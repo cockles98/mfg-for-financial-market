@@ -1,100 +1,79 @@
-﻿# mfg-finance
+# mfg-finance
 
-Implementacao em Python de um jogo de campo medio (Mean Field Game, MFG) para microestrutura de mercado. O modelo acopla a equacao de Hamilton-Jacobi-Bellman (HJB) e a equacao de Fokker-Planck (FP) por meio de uma iteracao de Picard, permitindo estudar as estrategias de negociacao de agentes identicos em continuo.
+Academic prototype (undergraduate research) that blends real B3 data with a linear-quadratic Mean Field Game (MFG). The goal is to show how thousands of similar agents manage inventory while the market reacts to aggregate order flow.
 
-## Visao geral do MFG
+## Model summary
 
-- Agentes atomisticos controlam fluxos de ordem (lpha) para gerir inventario.
-- A friccao de execucao depende do fluxo medio: eta(m) = eta0 + eta1 * |mean(alpha)|.
-- O terminal payoff penaliza inventario com peso gamma_T, enquanto phi pune inventario corrente.
-- Opcionalmente, um preco endogeno P(t) pode ser calculado por clearing instantaneo quando habilitado.
+- Agents control an order flow `alpha` and prefer inventories close to zero.
+- Execution friction depends on the average flow: `eta(m) = eta0 + eta1 * |mean(alpha)|`.
+- Quadratic costs: running (`phi`) and terminal (`gamma_T`) penalties.
+- Coupled HJB / Fokker-Planck equations solved via Picard iteration.
+- Optional endogenous price computed by instantaneous clearing.
 
-## Hipoteses LQ
+## LQ assumptions and current limitations
 
-- Custos quadraticos (LQ) em inventario e controle; gradientes produzem controles lineares.
-- Ruido apenas idiossincratico (
-u), sem componente comum ou agente dominante.
-- Estado unidimensional (inventario); nao ha restricoes rigidas de caixa ou alavancagem.
+- Only idiosyncratic noise (no common noise, no dominant agent).
+- One-dimensional state (inventory only); no spreads or extra factors.
+- Picard iteration with numerical safeguards; dense grids still require acceleration (Newton/policy iteration).
+- Execution costs and supply are heuristic; calibration with intraday volume/spread remains future work.
 
-## Escolhas numericas
+## Numerical choices / guarantees
 
-- **HJB**: esquema Lax-Friedrichs monotono (dissipacao adaptativa) seguido de resolucao implicita difusiva.
-- **FP**: adveccao upwind conservativa explicita + difusao implicita (semi-implicito).
-- **Iteracao**: Picard com relaxacao mix, tolerancia L2 (||M^{k+1} - M^k||_2).
-- **CFL heuristico**: Grid1D.suggest_cfl_limits() informa limites difusivos/adveccao e o CLI emite avisos quando dt e agressivo.
+- HJB: Lax-Friedrichs with bounded dissipation plus relaxed implicit step.
+- FP: upwind conservative advection plus implicit diffusion.
+- Positivity and mass conservation enforced (projection on the simplex).
+- Tests cover operators, Picard stability, mesh refinement.
 
-## Garantias numericas
+## Installation
 
-- **Positividade**: densidades projetadas para o simplex (corte em zero + renormalizacao).
-- **Conservacao de massa**: FP semi-implicito preserva sum m dx ≈ 1 (testado automaticamente).
-- **Refinamento**: testes verificam que a norma L2 entre solucao grossa/fina diminui quando se dobra a malha.
-
-## Limitacoes atuais
-
-- Dominio 1D; nao ha dinamica multi-ativo nem preco resiliente multi-dimensional.
-- Ausencia de ruido comum, agente dominante ou heterogeneidade estrutural.
-- Picard pode ser lento em regimes rigidos; nao ha Newton/policy iteration.
-- Sem calibracao empirica ou validacao com dados historicos.
-
-## Instalação
-
-`ash
+```bash
 pip install -e .
-`
+```
 
-Requisitos: Python >= 3.10 e pacotes listados em pyproject.toml (
-umpy, scipy, matplotlib, pyyaml, 	qdm, pytest).
+Python >= 3.10 with packages from `pyproject.toml` (`numpy`, `scipy`, `matplotlib`, `pyyaml`, `tqdm`, `pytest`).
 
-## Execucao de experiencias
+## Quick start
 
-### CLI principal
+- **CLI**
+  ```bash
+  python -m mfg_finance.cli run --config configs/baseline.yaml
+  ```
+  Saves artefacts under `artifacts/run-*/`. Add `--endogenous-price` to compute the clearing price.
 
-`ash
-python -m mfg_finance.cli run --config configs/baseline.yaml
-`
+- **Notebook**: `notebooks/mfg_pipeline.ipynb` calibrates, runs the solver, and writes outputs to `notebooks_output/`.
+- **Scripts**: `examples/run_baseline.py` and `examples/run_sweep_phi_gamma.py` reproduce standard scenarios.
 
-- Artefatos em rtifacts/run-*/ (U_all.npy, M_all.npy, lpha_all.npy, metrics.json, figuras, etc.).
-- Para preco endogeno instantaneo adicione --endogenous-price (gera price.csv e price.png).
+## Repository structure and status
 
-### Script baseline
+| Path | Purpose | Status |
+|------|---------|--------|
+| `src/mfg_finance/` | Grid, operators, HJB/FP, Picard, price, viz, CLI | OK (with safeguards) |
+| `data/processed/`  | Clean COTAHIST parquet/CSV, returns/vol stats | OK (ready to use) |
+| `configs/baseline.yaml` | Moderate grid (201x150) + soft penalties | OK (convergent) |
+| `tests/` | `pytest -q` covers operators, mass, Picard, refinement | OK (all green) |
+| `reports/analytics/` | Aggregated charts (histograms, top vol) | OK (auto-generated) |
+| `reports/final/mfg_report.html` | Plain-language summary + figures | OK (ready for presentation) |
 
-`ash
-python -m examples.run_baseline
-`
+### Current state (academic focus)
+- Demonstration only; not a production pricing engine.
+- Heuristics match the order-of-magnitude for volatility/intensity, but execution costs and supply still lack calibration with real volume/spread data.
+- Numerical safeguards (gradient/value caps, relaxation) keep the solver stable on moderate grids; larger grids still need faster methods.
+- Pipeline already produces a complete report in `reports/final/`.
 
-Salva matrizes e figuras (density.png, alue.png, lpha_cuts.png, convergence.png) em examples_output/.
+## Tests
 
-### Varredura phi/gamma_T
-
-`ash
-python -m examples.run_sweep_phi_gamma
-`
-
-Gera examples_output/sweep_phi_gamma/ com heatmap_alpha_mean.png, sweep_summary.csv e matrizes auxiliares. Evidencia a transicao de liquidez quando phi/gamma_T aumenta (round-tripper -> small-IT).
-
-## Testes
-
-`ash
+```bash
 pytest -q
-`
+```
 
-18 testes cobrem operadores, HJB/FP, Picard, refinamento de malha e suites auxiliares.
+18 tests cover operators, solver stability, mass conservation, mesh refinement, and Picard.
 
-## Estrutura do projeto
+## Immediate roadmap
 
-- src/mfg_finance/: grid, operadores, Hamiltoniana LQ, resolvers HJB/FP, Picard, precificacao, visualizacao e CLI.
-- configs/baseline.yaml: configuracao principal (malha 401x200, phi=0.1, gamma_T=2.0).
-- 	ests/: regressao numerica (mass, convergencia, refinamento).
-- examples/: scripts de reproducao (baseline e sweep).
+1. **Empirical calibration**: fit `eta0`, `eta1`, `phi`, `gamma_T` using intraday volume/spread or order-book data.
+2. **Numerical acceleration**: Newton/policy iteration and/or adaptive meshes for larger grids.
+3. **Common noise / heterogeneous agents**: add systemic shocks and a large player (market maker vs. crowd) to compare liquidity regimes.
 
-## Roadmap
+## License
 
-1. **Ruido comum** e choques sistemicos compartilhados.
-2. **Jogador maior** (market maker) e possivel Stackelberg MFG.
-3. **Aceleracao numerica** com Newton/policy iteration e controle adaptativo da relaxacao.
-4. **Estados adicionais** (preco resiliente, spread) tornando FP multi-dimensional.
-5. **Calibracao empirica** com dados reais de order-flow.
-
-## Licenca
-
-MIT.
+MIT
