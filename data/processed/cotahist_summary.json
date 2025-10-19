@@ -1,0 +1,20 @@
+{
+  "files_processed": [
+    "COTAHIST_A2015.TXT",
+    "COTAHIST_A2016.TXT",
+    "COTAHIST_A2017.TXT",
+    "COTAHIST_A2018.TXT",
+    "COTAHIST_A2019.TXT",
+    "COTAHIST_A2020.TXT",
+    "COTAHIST_A2021.TXT",
+    "COTAHIST_A2022.TXT",
+    "COTAHIST_A2023.TXT",
+    "COTAHIST_A2024.TXT",
+    "COTAHIST_A2025.TXT"
+  ],
+  "rows_clean": 14779444,
+  "rows_removed_zero_close": 386489,
+  "assets": 651660,
+  "date_start": "2015-01-02",
+  "date_end": "2025-10-06"
+}

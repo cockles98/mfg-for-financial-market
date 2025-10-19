@@ -1,0 +1,16 @@
+{
+  "assets": 1799,
+  "observations_total": 1154258,
+  "mean_daily_return_median": 9.324108615081357e-05,
+  "mean_daily_return_mean": 0.0021819941567205537,
+  "annualised_vol_median": 0.7071875160027775,
+  "annualised_vol_mean": 1.0683600528672683,
+  "annualised_vol_quantiles": {
+    "10pct": 0.3370753153603387,
+    "25pct": 0.4640802282303432,
+    "50pct": 0.7071875160027775,
+    "75pct": 1.1377246477062841,
+    "90pct": 1.7656005981035698
+  },
+  "roll_vol20_mean": 0.5344328965162091
+}

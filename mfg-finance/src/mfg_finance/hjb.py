@@ -55,16 +55,23 @@ def terminal_condition_U(grid: Grid1D, params: HFTParams) -> np.ndarray:
     return params.gamma_T * (grid.x**2)
 
 
-def _lax_friedrichs_gradient(values: np.ndarray, dx: float) -> np.ndarray:
+def _lax_friedrichs_gradient(
+    values: np.ndarray,
+    dx: float,
+    *,
+    max_dissipation: float | None = None,
+) -> np.ndarray:
     """
     Compute a monotone gradient approximation using a Lax-Friedrichs stencil.
     """
 
     forward = forward_difference(values, dx)
     backward = backward_difference(values, dx)
-    a = np.max(np.abs(np.concatenate((forward, backward))))
+    a = float(np.max(np.abs(np.concatenate((forward, backward)))))
     if not np.isfinite(a) or a < 1e-8:
         a = 1e-3
+    if max_dissipation is not None:
+        a = min(a, float(max_dissipation))
     grad = 0.5 * (forward + backward) - 0.5 * a * (forward - backward)
     grad[0] = forward[0]
     grad[-1] = backward[-1]
@@ -80,6 +87,10 @@ def hjb_step(
     max_inner: int = 4,
     tol: float = 1e-8,
     eta_callback: EtaCallback | None = None,
+    max_dissipation: float | None = None,
+    alpha_cap: float | None = None,
+    value_cap: float | None = None,
+    value_relaxation: float | None = None,
 ) -> np.ndarray:
     """
     Perform a single backward HJB step using a monotone discretisation.
@@ -120,7 +131,7 @@ def hjb_step(
     mean_alpha = 0.0
 
     for _ in range(max_inner):
-        gradient = _lax_friedrichs_gradient(U_iter, grid.dx)
+        gradient = _lax_friedrichs_gradient(U_iter, grid.dx, max_dissipation=max_dissipation)
         alpha = alpha_star(
             gradient,
             m_at_n,
@@ -128,6 +139,8 @@ def hjb_step(
             mean_alpha=mean_alpha,
             eta_callback=eta_callback,
         )
+        if alpha_cap is not None:
+            alpha = np.clip(alpha, -float(alpha_cap), float(alpha_cap))
         mean_alpha = mean_alpha_from(m_at_n, alpha, grid.dx)
         alpha = alpha_star(
             gradient,
@@ -136,6 +149,8 @@ def hjb_step(
             mean_alpha=mean_alpha,
             eta_callback=eta_callback,
         )
+        if alpha_cap is not None:
+            alpha = np.clip(alpha, -float(alpha_cap), float(alpha_cap))
 
         eta_value = effective_eta(mean_alpha, params)
         if eta_callback is not None:
@@ -155,15 +170,24 @@ def hjb_step(
 
         U_new = spla.spsolve(system_matrix, rhs)
 
-        if not np.all(np.isfinite(U_new)):
+        if value_cap is not None:
+            U_new = np.clip(U_new, -float(value_cap), float(value_cap))
+
+        if value_relaxation is not None:
+            relax = float(np.clip(value_relaxation, 0.0, 1.0))
+            U_relaxed = relax * U_new + (1.0 - relax) * U_iter
+        else:
+            U_relaxed = U_new
+
+        if not np.all(np.isfinite(U_relaxed)):
             msg = "Non-finite value encountered during HJB iteration."
             raise FloatingPointError(msg)
 
-        if np.max(np.abs(U_new - U_iter)) < tol:
-            U_iter = U_new
+        if np.max(np.abs(U_relaxed - U_iter)) < tol:
+            U_iter = U_relaxed
             break
 
-        U_iter = U_new
+        U_iter = U_relaxed
 
     return np.asarray(U_iter, dtype=np.float64)
 
@@ -178,6 +202,10 @@ def solve_hjb_backward(
     tol: float = 1e-8,
     progress: bool = True,
     eta_callback: EtaCallback | None = None,
+    max_dissipation: float | None = None,
+    alpha_cap: float | None = None,
+    value_cap: float | None = None,
+    value_relaxation: float | None = None,
 ) -> np.ndarray:
     """
     Solve the HJB equation backward in time given a density trajectory.
@@ -228,6 +256,10 @@ def solve_hjb_backward(
             max_inner=max_inner,
             tol=tol,
             eta_callback=eta_callback,
+            max_dissipation=max_dissipation,
+            alpha_cap=alpha_cap,
+            value_cap=value_cap,
+            value_relaxation=value_relaxation,
         )
     return U
 
@@ -243,6 +275,10 @@ class HJBSolver:
     max_inner: int = 4
     tol: float = 1e-8
     show_progress: bool = True
+    max_dissipation: float | None = None
+    alpha_cap: float | None = None
+    value_cap: float | None = None
+    value_relaxation: float | None = None
 
     def solve(
         self,
@@ -273,4 +309,8 @@ class HJBSolver:
             max_inner=self.max_inner,
             tol=self.tol,
             progress=self.show_progress,
+            max_dissipation=self.max_dissipation,
+            alpha_cap=self.alpha_cap,
+            value_cap=self.value_cap,
+            value_relaxation=self.value_relaxation,
         )

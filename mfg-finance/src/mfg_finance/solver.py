@@ -1,23 +1,18 @@
 """
 Picard iteration driver coupling the HJB and Fokker-Planck solvers.
 """
-
 from __future__ import annotations
-
 import json
 import pathlib
 from dataclasses import dataclass
 from typing import Callable, Dict, List, Tuple
-
 import numpy as np
-
 from .fp import FPSolver, solve_fp_forward
 from .grid import Grid1D
 from .hamiltonian import EtaCallback, alpha_star
 from .hjb import HJBSolver, solve_hjb_backward
 from .models.hft import HFTParams
 from .ops import project_positive_and_renormalize
-
 __all__ = [
     "ConvergenceCallback",
     "compute_alpha_traj",
@@ -26,11 +21,7 @@ __all__ = [
     "solve_mfg_picard",
     "MeanFieldGameSolver",
 ]
-
-
 ConvergenceCallback = Callable[[int, float], None]
-
-
 def compute_alpha_traj(
     U_all: np.ndarray,
     M_all: np.ndarray,
@@ -41,31 +32,23 @@ def compute_alpha_traj(
     """
     Compute the optimal control trajectory from the value and density paths.
     """
-
     if U_all.shape != M_all.shape:
         msg = "Value and density trajectories must share the same shape."
         raise ValueError(msg)
-
     alpha = np.zeros_like(U_all)
     for n in range(U_all.shape[0]):
         U_n = U_all[n]
         m_n = M_all[n]
-
         grad = np.empty_like(U_n)
         grad[1:-1] = (U_n[2:] - U_n[:-2]) / (2.0 * grid.dx)
         grad[0] = (U_n[1] - U_n[0]) / grid.dx
         grad[-1] = (U_n[-1] - U_n[-2]) / grid.dx
-
         alpha[n] = alpha_star(grad, m_n, params, mean_alpha=None, eta_callback=eta_callback)
-
     return alpha
-
-
 def compute_alpha_metrics(alpha_all: np.ndarray) -> Dict[str, float]:
     """
     Compute summary statistics for the control trajectory.
     """
-
     abs_alpha = np.abs(alpha_all)
     mean_abs = float(np.mean(abs_alpha))
     std_alpha = float(np.std(alpha_all))
@@ -75,19 +58,14 @@ def compute_alpha_metrics(alpha_all: np.ndarray) -> Dict[str, float]:
         "std_alpha": std_alpha,
         "liquidity_proxy": liquidity_proxy,
     }
-
-
 def save_metrics(metrics: Dict[str, float], path: pathlib.Path | str) -> None:
     """
     Persist metrics dictionary to disk as JSON.
     """
-
     output = pathlib.Path(path)
     output.parent.mkdir(parents=True, exist_ok=True)
     with output.open("w", encoding="utf-8") as handle:
         json.dump(metrics, handle, indent=2)
-
-
 def solve_mfg_picard(
     grid: Grid1D,
     params: HFTParams,
@@ -105,21 +83,19 @@ def solve_mfg_picard(
     """
     Run the Picard fixed-point iteration for the coupled MFG system.
     """
-
     hjb_kwargs = dict(hjb_kwargs or {})
+    hjb_kwargs.setdefault("max_dissipation", 1.0)
+    hjb_kwargs.setdefault("alpha_cap", 1.0)
+    hjb_kwargs.setdefault("value_cap", 50.0)
+    hjb_kwargs.setdefault("value_relaxation", 0.5)
     fp_kwargs = dict(fp_kwargs or {})
-
     if m0 is None:
         from .models.hft import initial_density
-
         m0 = initial_density(grid, params)
-
     m0 = project_positive_and_renormalize(np.asarray(m0, dtype=np.float64), dx=grid.dx)
     M_k = np.tile(m0, (grid.nt + 1, 1))
-
     errors: List[float] = []
     U_all = np.zeros_like(M_k)
-
     for iteration in range(max_iter):
         U_all = solve_hjb_backward(
             M_k,
@@ -129,7 +105,6 @@ def solve_mfg_picard(
             eta_callback=eta_callback,
             **hjb_kwargs,
         )
-
         M_raw = solve_fp_forward(
             U_all,
             grid,
@@ -138,34 +113,25 @@ def solve_mfg_picard(
             progress=False,
             **fp_kwargs,
         )
-
         M_next = mix * M_raw + (1.0 - mix) * M_k
         diff = M_next - M_k
         error = float(np.linalg.norm(diff.ravel()))
         errors.append(error)
-
         if callback is not None:
             callback(iteration, error)
-
         M_k = M_next
         if error < tol:
             break
-
     alpha_all = compute_alpha_traj(U_all, M_k, grid, params, eta_callback=eta_callback)
     metrics = compute_alpha_metrics(alpha_all)
-
     if metrics_path is not None:
         save_metrics(metrics, metrics_path)
-
     return U_all, M_k, alpha_all, errors, metrics
-
-
 @dataclass(slots=True)
 class MeanFieldGameSolver:
     """
     High-level convenience wrapper for the Picard solver.
     """
-
     grid: Grid1D
     params: HFTParams
     max_iter: int = 200
@@ -174,7 +140,6 @@ class MeanFieldGameSolver:
     hjb_kwargs: Dict[str, float] | None = None
     fp_kwargs: Dict[str, float] | None = None
     eta_callback: EtaCallback | None = None
-
     def run(
         self,
         initial_density: np.ndarray | None = None,
@@ -183,7 +148,6 @@ class MeanFieldGameSolver:
         """
         Execute the Picard iteration and return trajectories with logs.
         """
-
         return solve_mfg_picard(
             self.grid,
             self.params,

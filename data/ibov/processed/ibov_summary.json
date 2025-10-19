@@ -1,0 +1,9 @@
+{
+  "rows_original": 137210,
+  "rows_clean": 137210,
+  "duplicates_removed": 0,
+  "assets": 138,
+  "date_start": "2017-09-04",
+  "date_end": "2025-10-06",
+  "missing_close_zero": 0
+}
