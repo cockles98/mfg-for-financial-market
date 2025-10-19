@@ -1,0 +1,23 @@
+# Baseline configuration for the Mean Field Game solver.
+
+grid:
+  x_min: -5.0
+  x_max: 5.0
+  nx: 401
+  T: 1.0
+  nt: 200
+  bc: neumann
+
+params:
+  nu: 0.02
+  phi: 0.1
+  gamma_T: 2.0
+  eta0: 0.5
+  eta1: 0.8
+  m0_mean: 0.0
+  m0_std: 1.0
+
+solver:
+  max_iter: 200
+  tol: 1.0e-7
+  mix: 0.4
