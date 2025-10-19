@@ -19,7 +19,7 @@ from mfg_finance.solver import compute_alpha_metrics, solve_mfg_picard
 
 
 def _load_config() -> Dict[str, Any]:
-    cfg_path = pathlib.Path(__file__).resolve().parents[1] / "configs" / "baseline.yaml"
+    cfg_path = pathlib.Path(__file__).resolve().parents[1] / "mfg-finance" / "configs" / "baseline.yaml"
     with cfg_path.open("r", encoding="utf-8") as handle:
         return yaml.safe_load(handle)
 

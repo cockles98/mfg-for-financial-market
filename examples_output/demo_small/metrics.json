@@ -1,0 +1,10 @@
+{
+  "mean_abs_alpha": 1.0193768513467214,
+  "std_alpha": 1.154438672803507,
+  "liquidity_proxy": 0.4182388565604062,
+  "iterations": 14,
+  "final_error": 4.8185045576124955e-06,
+  "density_min": 1.8780477331113735e-08,
+  "density_max": 4.737295029673479,
+  "mass_final": 0.9999999999999998
+}

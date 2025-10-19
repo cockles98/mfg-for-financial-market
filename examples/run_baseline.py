@@ -18,7 +18,7 @@ from mfg_finance.viz import PlotConfig, plot_alpha_cuts, plot_convergence, plot_
 
 
 def _load_config() -> Dict[str, Any]:
-    config_path = pathlib.Path(__file__).resolve().parents[1] / "configs" / "baseline.yaml"
+    config_path = pathlib.Path(__file__).resolve().parents[1] / "mfg-finance" / "configs" / "baseline.yaml"
     with config_path.open("r", encoding="utf-8") as handle:
         return yaml.safe_load(handle)
 
