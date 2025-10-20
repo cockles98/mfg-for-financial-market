@@ -3,8 +3,8 @@ O projeto conecta otimização individual e efeitos de multidão no mercado. Em 
 
 ### **O que o código faz**
 - Resolve duas equações acopladas no tempo:
-- HJB (decisão ótima): calcula o “valor” de cada estado e a política ótima de negociação.
-- Fokker-Planck (população): descreve como a distribuição de posições dos agentes evolui.
+  - HJB (decisão ótima): calcula o “valor” de cada estado e a política ótima de negociação.
+  - Fokker-Planck (população): descreve como a distribuição de posições dos agentes evolui.
 - Encontra o equilíbrio por um laço de ponto-fixo (Picard), alternando HJB (para trás no tempo) e FP (para frente) até convergir.
 - Usa esquemas numéricos estáveis reconhecidos na literatura: Lax-Friedrichs (gradiente monotônico) e upwind conservativo (advecção), com difusão implícita. Isso preserva massa ≈ 1 e impede densidades negativas — requisitos básicos para resultados confiáveis.
 -Implementa um caso LQ (quadrático) inspirado em microestrutura/HFT: custo de execução, penalidade de inventário e (opcionalmente) custo dependente do fluxo médio do grupo.
