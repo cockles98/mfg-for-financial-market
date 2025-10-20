@@ -35,13 +35,33 @@ python -m mfg_finance.cli sweep \
 ```
 Artefatos são gerados em `artifacts/run-YYYYmmdd-HHMMSS/` ou `artifacts/sweep-.../` com arrays (`*.npy`), métricas (`metrics.json`), curvas de preço (`price.csv`) e figuras (`*.png`).
 
+![density](notebooks_output/run-20251020-005200/density_small.png)
+
+Distribuicao de probabilidade (FP) ao longo do tempo; a massa permanece conservada.
+
+![value_function](notebooks_output/run-20251020-005200/value_function_small.png)
+
+Funcao valor do HJB mostrando a evolucao do custo futuro e o impacto das bordas.
+
+![alpha_cuts](notebooks_output/run-20251020-005200/alpha_cuts_small.png)
+
+Politica otima alpha(t,x) em cortes selecionados: agentes suavizam extremos e retornam ao centro.
+
+![convergence](notebooks_output/run-20251020-005200/convergence_small.png)
+
+Erro L2 entre iteracoes Picard. A queda monotona confirma estabilidade numerica.
+
+![price](notebooks_output/run-20251020-005200/price_small.png)
+
+Trajeto do preco endogeno calibrado para media quase nula; variacoes refletem a oferta empirica.
+
+Para reproduzir o dashboard do notebook via CLI use `python scripts/run_notebook_pipeline.py`.
+
 ### Ajustes finos
 - `mix`, `mix_min`, `mix_decay`, `stagnation_tol`: controlam o amortecimento do Picard.
 - `relative_tol`: critério relativo adicional (além do `tol` absoluto) para parar o laço.
 - `hjb_inner` / `hjb_tol`: esforço interno do solver HJB.
 - `solver.supply` e `solver.price_sensitivity`: curva empírica de oferta e sensibilidade de clearing (ver seção “Dados”). O baseline usa `price_sensitivity = 30.0`, resultando em preço médio ≈ 0.
-- Para gerar os artefatos do notebook sem abrir o Jupyter:  
-  `python scripts/run_notebook_pipeline.py`
 
 ### Métricas
 `metrics.json` (CLI/notebook) inclui:
