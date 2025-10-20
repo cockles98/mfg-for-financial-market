@@ -71,7 +71,7 @@ $$
 
 ![Preço endógeno](notebooks_output/run-20251020-005200/price_small.png)
 
-### Métricas salvas
+## Métricas salvas
 `metrics.json` inclui:
 - `final_error`, `final_error_relative`, `iterations`
 - `mix_history`, `relative_errors`
@@ -145,6 +145,7 @@ tests/                    # suíte PyTest
 - Implementar policy iteration / Newton para aceleração.
 - Preço endógeno via mecanismos de clearing alternativos.
 - Extensões 2D e problemas não quadráticos.
+
 
 
 
