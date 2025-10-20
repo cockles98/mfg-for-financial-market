@@ -2,7 +2,7 @@
 Solver numerico de **Mean Field Games (MFG)** em 1D aplicado a microestrutura da B3. O sistema acopla **Hamilton–Jacobi–Bellman (HJB)** e **Fokker–Planck (FP)** resolvidos por iteracao de Picard com esquemas conservativos (Lax-Friedrichs + upwind). O projeto oferece CLI, notebook, scripts de preparacao de dados e testes automatizados.
 
 ## Visao geral
-O modelo conecta decisoes individuais de agentes de alta frequencia a efeitos agregados (campo medio). Cada agente decide esforcos de negociacao para minimizar custos de execucao e inventario, enquanto a media das decisoes retroalimenta o ambiente enfrentado por todos. O solver busca o equilibrio alternando HJB (valor) e FP (densidade) com amortecimento adaptativo.
+O modelo conecta decisoes individuais de agentes de alta frequencia (high frequency trade) a efeitos agregados (mean field). Cada agente decide esforcos de negociacao para minimizar custos de execucao e inventario, enquanto a media das decisoes retroalimenta o ambiente enfrentado por todos. O solver busca o equilibrio alternando HJB (valor) e FP (densidade) com amortecimento adaptativo.
 
 ## Equações (visão rápida)
 
@@ -135,6 +135,7 @@ tests/                    # suite PyTest
 - Implementar policy iteration / Newton para aceleracao.
 - Preco endogeno via mecanismos de clearing alternativos.
 - Extensoes 2D e problemas nao quadraticos.
+
 
 
 
