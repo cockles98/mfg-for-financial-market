@@ -35,7 +35,7 @@ df.reset_index(drop=True, inplace=True)
 
 processed_dir = Path('data/processed')
 processed_dir.mkdir(parents=True, exist_ok=True)
-parquet_path = processed_dir / 'cotahist_2015_2025_clean.parquet'
+parquet_path = processed_dir / 'cotahist_1986_2025_clean.parquet'
 df.to_parquet(parquet_path, index=False)
 
 summary = {

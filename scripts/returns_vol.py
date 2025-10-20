@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 processed_dir = Path('data/processed')
-source_parquet = processed_dir / 'cotahist_equities_2015_2025.parquet'
+source_parquet = processed_dir / 'cotahist_equities_1986_2025.parquet'
 if not source_parquet.exists():
     raise SystemExit(f'Processed parquet not found: {source_parquet}')
 

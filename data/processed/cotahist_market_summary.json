@@ -1,16 +1,16 @@
 {
-  "assets": 1799,
-  "observations_total": 1154258,
-  "mean_daily_return_median": 9.324108615081357e-05,
-  "mean_daily_return_mean": 0.0021819941567205537,
-  "annualised_vol_median": 0.7071875160027775,
-  "annualised_vol_mean": 1.0683600528672683,
+  "assets": 5354,
+  "observations_total": 3166159,
+  "mean_daily_return_median": 0.00024673893411802944,
+  "mean_daily_return_mean": 0.012396519309660813,
+  "annualised_vol_median": 1.756220925984057,
+  "annualised_vol_mean": 5.267539806094341,
   "annualised_vol_quantiles": {
-    "10pct": 0.3370753153603387,
-    "25pct": 0.4640802282303432,
-    "50pct": 0.7071875160027775,
-    "75pct": 1.1377246477062841,
-    "90pct": 1.7656005981035698
+    "10pct": 0.45528918255291145,
+    "25pct": 0.7501209971915075,
+    "50pct": 1.756220925984057,
+    "75pct": 5.556824824556857,
+    "90pct": 13.558085645528534
   },
-  "roll_vol20_mean": 0.5344328965162091
+  "roll_vol20_mean": 1.0886122628766162
 }

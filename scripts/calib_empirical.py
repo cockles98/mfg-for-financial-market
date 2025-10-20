@@ -109,7 +109,7 @@ pd.DataFrame(rows).to_csv(processed_dir / 'supply_curve.csv', index=False)
 # update baseline config
 def update_baseline():
     import yaml
-    cfg_path = Path('mfg-finance/configs/baseline.yaml')
+    cfg_path = Path('configs/baseline.yaml')
     with cfg_path.open('r', encoding='utf-8') as fp:
         cfg = yaml.safe_load(fp)
     params = cfg.setdefault('params', {})
