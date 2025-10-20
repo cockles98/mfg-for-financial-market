@@ -2,8 +2,6 @@
 Solver numérico de **Mean Field Games (MFG)** em 1D aplicado às ações da B3 de 2015 a 2025. O sistema acopla **Hamilton–Jacobi–Bellman (HJB)** e **Fokker–Planck (FP)** resolvidos por iteração de Picard com esquemas conservativos (Lax-Friedrichs + upwind). O projeto oferece CLI, notebook, scripts de preparação de dados e testes automatizados.
 
 ## Visão geral
-O modelo conecta decisões individuais de agentes de alta frequência a efeitos agregados (campo médio). Cada agente decide esforços de negociação para minimizar custos de execução e inventário, enquanto a média das decisões retroalimenta o ambiente enfrentado por todos. O solver busca o equilíbrio alternando HJB (valor) e FP (densidade) com amortecimento adaptativo.
-
 Resumidamente, o projeto conecta otimização individual e efeitos de multidão no mercado. Em vez de modelar um trader isolado, usa-se a estrutura de Mean Field Games (MFG): cada agente escolhe suas ações para minimizar custos (por exemplo, custo de execução e carregar inventário), enquanto a média das escolhas afeta o ambiente que todos enfrentam.
 
 ### **O que o código faz**
@@ -16,14 +14,6 @@ Resumidamente, o projeto conecta otimização individual e efeitos de multidão 
 
 ### **Por que isso importa**
 Esse arranjo permite experimentar hipóteses de mercado de forma controlada: como a liquidez muda quando negociar fica mais caro? O grupo tende a carregar mais ou menos inventário? A política ótima fica mais agressiva ou mais cautelosa? Os gráficos e métricas ajudam a visualizar esses regimes.
-
-## Destaques
-- 🔁 **HJB ↔ FP** com laço de **Picard** e *under-relaxation*.
-- 🧮 **Esquemas numéricos estáveis**: Lax-Friedrichs (grad monotônico) e upwind conservativo (advecção), difusão implícita via SciPy sparse.
-- 📈 **Modelo HFT LQ** (inventário + custo de execução endógeno opcional).
-- 🧪 **Testes**: conservação de massa, positividade, convergência do Picard e **refinamento de malha**.
-- 🧰 **CLI** para rodar *baseline*, varrer parâmetros e salvar artefatos (figuras, `.npy`, `metrics.json`, `summary.csv`).
-- 🗺️ **Config YAML** para reprodutibilidade.
 
 ## Equações (visão rápida)
 
@@ -154,6 +144,7 @@ tests/                    # suíte PyTest
 - Implementar policy iteration / Newton para aceleração.
 - Preço endógeno via mecanismos de clearing alternativos.
 - Extensões 2D e problemas não quadráticos.
+
 
 
 
