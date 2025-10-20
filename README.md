@@ -4,6 +4,27 @@ Solver numérico de **Mean Field Games (MFG)** em 1D aplicado às ações da B3 
 ## Visão geral
 O modelo conecta decisões individuais de agentes de alta frequência a efeitos agregados (campo médio). Cada agente decide esforços de negociação para minimizar custos de execução e inventário, enquanto a média das decisões retroalimenta o ambiente enfrentado por todos. O solver busca o equilíbrio alternando HJB (valor) e FP (densidade) com amortecimento adaptativo.
 
+Resumidamente, o projeto conecta otimização individual e efeitos de multidão no mercado. Em vez de modelar um trader isolado, usa-se a estrutura de Mean Field Games (MFG): cada agente escolhe suas ações para minimizar custos (por exemplo, custo de execução e carregar inventário), enquanto a média das escolhas afeta o ambiente que todos enfrentam.
+
+### **O que o código faz**
+- Resolve duas equações acopladas no tempo:
+  - HJB (decisão ótima): calcula o “valor” de cada estado e a política ótima de negociação.
+  - Fokker-Planck (população): descreve como a distribuição de posições dos agentes evolui.
+- Encontra o equilíbrio por um laço de ponto-fixo (Picard), alternando HJB (para trás no tempo) e FP (para frente) até convergir.
+- Usa esquemas numéricos estáveis reconhecidos na literatura: Lax-Friedrichs (gradiente monotônico) e upwind conservativo (advecção), com difusão implícita. Isso preserva massa ≈ 1 e impede densidades negativas — requisitos básicos para resultados confiáveis.
+- Implementa um caso LQ (quadrático) inspirado em microestrutura/HFT: custo de execução, penalidade de inventário e (opcionalmente) custo dependente do fluxo médio do grupo.
+
+### **Por que isso importa**
+Esse arranjo permite experimentar hipóteses de mercado de forma controlada: como a liquidez muda quando negociar fica mais caro? O grupo tende a carregar mais ou menos inventário? A política ótima fica mais agressiva ou mais cautelosa? Os gráficos e métricas ajudam a visualizar esses regimes.
+
+## Destaques
+- 🔁 **HJB ↔ FP** com laço de **Picard** e *under-relaxation*.
+- 🧮 **Esquemas numéricos estáveis**: Lax-Friedrichs (grad monotônico) e upwind conservativo (advecção), difusão implícita via SciPy sparse.
+- 📈 **Modelo HFT LQ** (inventário + custo de execução endógeno opcional).
+- 🧪 **Testes**: conservação de massa, positividade, convergência do Picard e **refinamento de malha**.
+- 🧰 **CLI** para rodar *baseline*, varrer parâmetros e salvar artefatos (figuras, `.npy`, `metrics.json`, `summary.csv`).
+- 🗺️ **Config YAML** para reprodutibilidade.
+
 ## Equações (visão rápida)
 
 **HJB (backward)**
@@ -133,6 +154,7 @@ tests/                    # suíte PyTest
 - Implementar policy iteration / Newton para aceleração.
 - Preço endógeno via mecanismos de clearing alternativos.
 - Extensões 2D e problemas não quadráticos.
+
 
 
 
