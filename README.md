@@ -36,20 +36,20 @@ $$
 > **1D:** $\nabla U \equiv \partial_x U$ e $\nabla\cdot(mv)\equiv \partial_x(mv)$.
 
 ## Pipeline visual
-![Distribuição](notebooks_output/run-20251020-005200/density_small.png)
 *Distribuição do FP ao longo do tempo; a massa permanece conservada.*
+![Distribuição](notebooks_output/run-20251020-005200/density_small.png)
 
-![Função valor](notebooks_output/run-20251020-005200/value_function_small.png)
 *Função valor do HJB mostrando o custo futuro e o impacto das bordas.*
+![Função valor](notebooks_output/run-20251020-005200/value_function_small.png)
 
-![Política ótima](notebooks_output/run-20251020-005200/alpha_cuts_small.png)
 *Quatro cortes da política ótima $lpha(t,x)$ evidenciam o alisamento do controle.*
+![Política ótima](notebooks_output/run-20251020-005200/alpha_cuts_small.png)
 
-![Convergência](notebooks_output/run-20251020-005200/convergence_small.png)
 *Erro $L^2$ entre iterações Picard; a queda monotônica confirma estabilidade.*
+![Convergência](notebooks_output/run-20251020-005200/convergence_small.png)
 
-![Preço endógeno](notebooks_output/run-20251020-005200/price_small.png)
 *Trajetória do preço de clearing calibrado para média quase nula; oscilações refletem a oferta empírica.*
+![Preço endógeno](notebooks_output/run-20251020-005200/price_small.png)
 
 Para reproduzir o painel sem abrir o Jupyter execute `python scripts/run_notebook_pipeline.py`.
 
@@ -126,5 +126,6 @@ tests/                    # suíte PyTest
 - Implementar policy iteration / Newton para aceleração.
 - Preço endógeno via mecanismos de clearing alternativos.
 - Extensões 2D e problemas não quadráticos.
+
 
 
