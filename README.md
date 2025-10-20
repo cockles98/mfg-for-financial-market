@@ -8,12 +8,12 @@ O modelo conecta decisoes individuais de agentes de alta frequencia a efeitos ag
 **HJB (backward)**
 
 $$
-egin{aligned}
+\begin{cases}
 & -\partial_t U(t,x) - 
 u \Delta U(t,x) + H(
 abla U(t,x), m(t,x)) = 0 \
 & U(T,x) = \gamma_T x^2
-\end{aligned}
+\end{cases}
 $$
 
 **FP (forward)**
@@ -32,7 +32,8 @@ $$
 $$
 egin{aligned}
 & lpha^{*}(t,x) = -rac{\partial_x U(t,x)}{\eta(m)} \
-& \eta(m) = \eta_0 + \eta_1 \lvert \overline{lpha} vert
+& \eta(m) = \eta_0 + \eta_1 \lvert \overline{lpha} 
+vert
 \end{aligned}
 $$
 
@@ -139,3 +140,4 @@ tests/                    # suite PyTest
 - Implementar policy iteration / Newton para aceleracao.
 - Preco endogeno via mecanismos de clearing alternativos.
 - Extensoes 2D e problemas nao quadraticos.
+
