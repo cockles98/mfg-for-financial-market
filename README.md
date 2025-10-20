@@ -81,15 +81,35 @@ PYTHONPATH=src python -m pytest -q
 python -m mfg_finance.cli run --config configs/baseline.yaml
 
 # varredura de parÃ¢metros (exemplo)
-python -m mfg_finance.cli sweep --phi 0.05,0.1,0.2 --gamma_T 1.0,2.0
+python -m mfg_finance.cli sweep --phi 0.02,0.035359,0.05 --gamma_T 0.4,0.568862
 ```
 SaÃ­das ficam em `artifacts/run-YYYYmmdd-HHMMSS/` (figuras `.png`, arrays `.npy`, `metrics.json`, `summary.csv`).
 
 ### Ajustes finos do solver
-- `mix`, `mix_min`, `mix_decay` e `stagnation_tol` controlam a *under-relaxation* adaptativa do laÃ§o de Picard.
-- `relative_tol` encerra a iteraÃ§Ã£o quando a variaÃ§Ã£o relativa da densidade cai abaixo do limiar (alÃ©m do `tol` absoluto tradicional).
-- HJB interno aceita `hjb_inner` e `hjb_tol` para limitar iteraÃ§Ãµes internas.
-- Para liberar o clearing endÃ³geno, execute `python -m mfg_finance.cli run --config configs/baseline.yaml --endogenous-price`.
+- `mix`, `mix_min`, `mix_decay` e `stagnation_tol` controlam a *under-relaxation* adaptativa do laço de Picard.
+- `relative_tol` encerra a iteração quando a variação relativa da densidade cai abaixo do limiar (além do `tol` absoluto tradicional).
+- HJB interno aceita `hjb_inner` e `hjb_tol` para limitar iterações internas.
+- O clearing endógeno já vem habilitado em `configs/baseline.yaml`: a curva de oferta em `solver.supply` vem do script `scripts/build_supply_curve.py` (COTAHIST 2015-2025) e é normalizada por `scripts/update_solver_config.py`. A sensibilidade padrão `solver.price_sensitivity = 30.0` garante preço médio ≈ 0; ajuste conforme necessidade.
+- Para testar regimes alternativos execute `python -m mfg_finance.cli run --config configs/baseline.yaml --endogenous-price`.
+
+### Sweeps rápidos
+Use a CLI para varrer parâmetros e validar estabilidade com os dados calibrados:
+
+```bash
+python -m mfg_finance.cli sweep ^
+  --config configs/baseline.yaml ^
+  --phi 0.02,0.035359,0.05 ^
+  --gamma_T 0.4,0.568862
+```
+
+O comando gera `artifacts/sweep-YYYYmmdd-HHMMSS/summary.csv` com métricas (erro final, |alpha| médio, proxy de liquidez e estatísticas de preço quando o clearing converge). Ajuste as listas conforme o experimento.
+
+### Dados e reprodutibilidade
+- Os insumos vêm do **COTAHIST/B3 (2015–2025)**; veja `docs/DATA.md` para detalhes legais e passos de preparação.
+- Reconstrua o resumo de oferta com `python scripts/build_supply_curve.py` (exige `data/processed/cotahist_equities_extended.parquet`).
+- Propague a curva para o solver rodando `python scripts/update_solver_config.py` (opções `--scale`, `--price-sensitivity` e `--samples` replicam o `baseline`).
+- Para gerar os artefatos do notebook sem depender do Jupyter use python scripts/run_notebook_pipeline.py.
+- As execuções escrevem `metrics.json` com erros absolutos/relativos e estatísticas de preço (`price_mean`, `price_std`, `price_min`, `price_max`, `price_span`).
 
 ## Testes e validaÃ§Ãµes
 ```bash
@@ -103,6 +123,7 @@ pytest -q
 ## Estrutura (resumo)
 ```
 configs/                  # YAMLs reproducÃ­veis
+docs/                     # notas sobre dados e reprodução
 data/                     # insumos brutos e processados
 examples/                 # scripts de uso rÃ¡pido
 notebooks/                # notebooks exploratÃ³rios

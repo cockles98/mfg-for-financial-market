@@ -18,7 +18,7 @@ import yaml
 from .grid import Grid1D
 from .models.hft import HFTParams, eta_from_m_alpha, initial_density
 from .price import solve_price_clearing
-from .solver import solve_mfg_picard
+from .solver import save_metrics, solve_mfg_picard
 from .viz import (
     PlotConfig,
     plot_alpha_cuts,
@@ -255,6 +255,16 @@ def _run_single_experiment(
         )
         price_mean = float(np.mean(prices))
         price_std = float(np.std(prices))
+        price_min = float(np.min(prices))
+        price_max = float(np.max(prices))
+        price_span = float(price_max - price_min)
+        metrics.update(
+            price_mean=price_mean,
+            price_std=price_std,
+            price_min=price_min,
+            price_max=price_max,
+            price_span=price_span,
+        )
 
         np.savetxt(
             artifacts_dir / "price.csv",
@@ -264,6 +274,7 @@ def _run_single_experiment(
             comments="",
         )
         plot_price(grid.t, prices, artifacts_dir / "price.png")
+    save_metrics(metrics, metrics_path)
 
     final_error = float(metrics.get("final_error", errors[-1] if errors else 0.0))
     iterations = int(metrics.get("iterations", len(errors)))
