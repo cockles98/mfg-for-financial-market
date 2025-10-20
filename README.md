@@ -9,28 +9,28 @@ O modelo conecta decisões individuais de agentes de alta frequência a efeitos 
 **HJB (backward)**
 
 $$
-\begin{aligned}
+\begin{cases}
 & -\partial_t U(t,x) - \nu \Delta U(t,x) + H(\nabla U(t,x), m(t,x)) = 0 \\
 & U(T,x) = \gamma_T x^2
-\end{aligned}
+\end{cases}
 $$
 
 **FP (forward)**
 
 $$
-\begin{aligned}
+\begin{cases}
 & \partial_t m(t,x) - \nu \Delta m(t,x) - \nabla\cdot\big(m(t,x)v(t,x)\big) = 0 \\
 & m(0,x) = m_0(x)
-\end{aligned}
+\end{cases}
 $$
 
 **Controle ótimo LQ**
 
 $$
-\begin{aligned}
+\begin{cases}
 & \alpha^{*}(t,x) = -\frac{\partial_x U(t,x)}{\eta(m)} \\
 & \eta(m) = \eta_0 + \eta_1 \lvert \overline{\alpha} \rvert
-\end{aligned}
+\end{cases}
 $$
 
 > **1D:** $\nabla U \equiv \partial_x U$ e $\nabla\cdot(mv)\equiv \partial_x(mv)$.
@@ -126,4 +126,5 @@ tests/                    # suíte PyTest
 - Implementar policy iteration / Newton para aceleração.
 - Preço endógeno via mecanismos de clearing alternativos.
 - Extensões 2D e problemas não quadráticos.
+
 
