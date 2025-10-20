@@ -1,4 +1,4 @@
-"""
+﻿"""
 Command-line interface for running Mean Field Game simulations.
 """
 
@@ -119,12 +119,34 @@ def _save_numpy_array(path: pathlib.Path, array: np.ndarray) -> None:
     np.save(path, array)
 
 
-def _write_errors_csv(path: pathlib.Path, errors: Iterable[float]) -> None:
+def _write_errors_csv(
+    path: pathlib.Path,
+    errors: Iterable[float],
+    *,
+    relative: Iterable[float] | None = None,
+    mix: Iterable[float] | None = None,
+) -> None:
     with path.open("w", encoding="utf-8", newline="") as handle:
         writer = csv.writer(handle)
-        writer.writerow(["iteration", "error_l2"])
-        for i, value in enumerate(errors):
-            writer.writerow([i, value])
+        header = ["iteration", "error_l2"]
+        if relative is not None:
+            header.append("error_relative")
+        if mix is not None:
+            header.append("mix")
+        writer.writerow(header)
+
+        abs_list = list(errors)
+        rel_list = list(relative) if relative is not None else []
+        mix_list = list(mix) if mix is not None else []
+        for idx, value in enumerate(abs_list):
+            row = [idx, value]
+            if relative is not None:
+                rel_value = rel_list[idx] if idx < len(rel_list) else ""
+                row.append(rel_value)
+            if mix is not None:
+                mix_value = mix_list[idx] if idx < len(mix_list) else ""
+                row.append(mix_value)
+            writer.writerow(row)
 
 
 def _build_supply_schedule(solver_cfg: Dict[str, Any], grid: Grid1D) -> np.ndarray:
@@ -162,10 +184,10 @@ def _run_single_experiment(
     )
     diffusion_limit = cfl_limits.get("diffusion_dt")
     if diffusion_limit is not None and grid.dt > diffusion_limit:
-        print(f"[warning] Time step dt={grid.dt:.3e} exceeds diffusion CFL ≈ {diffusion_limit:.3e}.")
+        print(f"[warning] Time step dt={grid.dt:.3e} exceeds diffusion CFL â‰ˆ {diffusion_limit:.3e}.")
     advection_limit = cfl_limits.get("advection_dt")
     if advection_limit is not None and grid.dt > advection_limit:
-        print(f"[warning] Time step dt={grid.dt:.3e} exceeds advection CFL ≈ {advection_limit:.3e}.")
+        print(f"[warning] Time step dt={grid.dt:.3e} exceeds advection CFL â‰ˆ {advection_limit:.3e}.")
 
     U_all, M_all, alpha_all, errors, metrics = solve_mfg_picard(
         grid,
@@ -173,6 +195,10 @@ def _run_single_experiment(
         max_iter=int(solver_cfg.get("max_iter", 200)),
         tol=float(solver_cfg.get("tol", 1e-8)),
         mix=float(solver_cfg.get("mix", 0.3)),
+        relative_tol=float(solver_cfg["relative_tol"]) if "relative_tol" in solver_cfg else None,
+        mix_min=float(solver_cfg.get("mix_min", 1e-4)),
+        mix_decay=float(solver_cfg.get("mix_decay", 0.5)),
+        stagnation_tol=float(solver_cfg.get("stagnation_tol", 0.02)),
         m0=m0,
         hjb_kwargs={"max_inner": solver_cfg.get("hjb_inner", 4), "tol": solver_cfg.get("hjb_tol", 1e-8)},
         fp_kwargs={},
@@ -184,7 +210,12 @@ def _run_single_experiment(
     _save_numpy_array(artifacts_dir / "U_all.npy", U_all)
     _save_numpy_array(artifacts_dir / "M_all.npy", M_all)
     _save_numpy_array(artifacts_dir / "alpha_all.npy", alpha_all)
-    _write_errors_csv(artifacts_dir / "errors.csv", errors)
+    _write_errors_csv(
+        artifacts_dir / "errors.csv",
+        errors,
+        relative=metrics.get("relative_errors"),
+        mix=metrics.get("mix_history"),
+    )
 
     with (artifacts_dir / "config.json").open("w", encoding="utf-8") as handle:
         json.dump(cfg, handle, indent=2)
@@ -234,8 +265,8 @@ def _run_single_experiment(
         )
         plot_price(grid.t, prices, artifacts_dir / "price.png")
 
-    final_error = errors[-1] if errors else 0.0
-    iterations = len(errors)
+    final_error = float(metrics.get("final_error", errors[-1] if errors else 0.0))
+    iterations = int(metrics.get("iterations", len(errors)))
 
     return {
         "grid": grid,

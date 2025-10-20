@@ -1,28 +1,28 @@
-# Mean Field Game Theory na bolsa brasileira
-Solver de **Mean Field Games (MFG)** para finanças em 1D, acoplando **Hamilton–Jacobi–Bellman (HJB)** e **Fokker–Planck (FP)** com iteração de Picard, Lax-Friedrichs no HJB e upwind conservativo no FP. O projeto inclui CLI, experimentos reprodutíveis, métricas e testes de massa/positividade/convergência.
+﻿# Mean Field Game Theory na bolsa brasileira
+Solver de **Mean Field Games (MFG)** para finanÃ§as em 1D, acoplando **Hamiltonâ€“Jacobiâ€“Bellman (HJB)** e **Fokkerâ€“Planck (FP)** com iteraÃ§Ã£o de Picard, Lax-Friedrichs no HJB e upwind conservativo no FP. O projeto inclui CLI, experimentos reprodutÃ­veis, mÃ©tricas e testes de massa/positividade/convergÃªncia.
 
-Resumidamente, o projeto conecta otimização individual e efeitos de multidão no mercado. Em vez de modelar um trader isolado, usa-se a estrutura de Mean Field Games (MFG): cada agente escolhe suas ações para minimizar custos (por exemplo, custo de execução e carregar inventário), enquanto a média das escolhas afeta o ambiente que todos enfrentam.
+Resumidamente, o projeto conecta otimizaÃ§Ã£o individual e efeitos de multidÃ£o no mercado. Em vez de modelar um trader isolado, usa-se a estrutura de Mean Field Games (MFG): cada agente escolhe suas aÃ§Ãµes para minimizar custos (por exemplo, custo de execuÃ§Ã£o e carregar inventÃ¡rio), enquanto a mÃ©dia das escolhas afeta o ambiente que todos enfrentam.
 
-### **O que o código faz**
-- Resolve duas equações acopladas no tempo:
-  - HJB (decisão ótima): calcula o “valor” de cada estado e a política ótima de negociação.
-  - Fokker-Planck (população): descreve como a distribuição de posições dos agentes evolui.
-- Encontra o equilíbrio por um laço de ponto-fixo (Picard), alternando HJB (para trás no tempo) e FP (para frente) até convergir.
-- Usa esquemas numéricos estáveis reconhecidos na literatura: Lax-Friedrichs (gradiente monotônico) e upwind conservativo (advecção), com difusão implícita. Isso preserva massa ≈ 1 e impede densidades negativas — requisitos básicos para resultados confiáveis.
--Implementa um caso LQ (quadrático) inspirado em microestrutura/HFT: custo de execução, penalidade de inventário e (opcionalmente) custo dependente do fluxo médio do grupo.
+### **O que o cÃ³digo faz**
+- Resolve duas equaÃ§Ãµes acopladas no tempo:
+  - HJB (decisÃ£o Ã³tima): calcula o â€œvalorâ€ de cada estado e a polÃ­tica Ã³tima de negociaÃ§Ã£o.
+  - Fokker-Planck (populaÃ§Ã£o): descreve como a distribuiÃ§Ã£o de posiÃ§Ãµes dos agentes evolui.
+- Encontra o equilÃ­brio por um laÃ§o de ponto-fixo (Picard), alternando HJB (para trÃ¡s no tempo) e FP (para frente) atÃ© convergir.
+- Usa esquemas numÃ©ricos estÃ¡veis reconhecidos na literatura: Lax-Friedrichs (gradiente monotÃ´nico) e upwind conservativo (advecÃ§Ã£o), com difusÃ£o implÃ­cita. Isso preserva massa â‰ˆ 1 e impede densidades negativas â€” requisitos bÃ¡sicos para resultados confiÃ¡veis.
+-Implementa um caso LQ (quadrÃ¡tico) inspirado em microestrutura/HFT: custo de execuÃ§Ã£o, penalidade de inventÃ¡rio e (opcionalmente) custo dependente do fluxo mÃ©dio do grupo.
 
 ### **Por que isso importa**
-Esse arranjo permite experimentar hipóteses de mercado de forma controlada: como a liquidez muda quando negociar fica mais caro? O grupo tende a carregar mais ou menos inventário? A política ótima fica mais agressiva ou mais cautelosa? Os gráficos e métricas ajudam a visualizar esses regimes.
+Esse arranjo permite experimentar hipÃ³teses de mercado de forma controlada: como a liquidez muda quando negociar fica mais caro? O grupo tende a carregar mais ou menos inventÃ¡rio? A polÃ­tica Ã³tima fica mais agressiva ou mais cautelosa? Os grÃ¡ficos e mÃ©tricas ajudam a visualizar esses regimes.
 
 ## Destaques
-- 🔁 **HJB ↔ FP** com laço de **Picard** e *under-relaxation*.
-- 🧮 **Esquemas numéricos estáveis**: Lax-Friedrichs (grad monotônico) e upwind conservativo (advecção), difusão implícita via SciPy sparse.
-- 📈 **Modelo HFT LQ** (inventário + custo de execução endógeno opcional).
-- 🧪 **Testes**: conservação de massa, positividade, convergência do Picard e **refinamento de malha**.
-- 🧰 **CLI** para rodar *baseline*, varrer parâmetros e salvar artefatos (figuras, `.npy`, `metrics.json`, `summary.csv`).
-- 🗺️ **Config YAML** para reprodutibilidade.
+- ðŸ” **HJB â†” FP** com laÃ§o de **Picard** e *under-relaxation*.
+- ðŸ§® **Esquemas numÃ©ricos estÃ¡veis**: Lax-Friedrichs (grad monotÃ´nico) e upwind conservativo (advecÃ§Ã£o), difusÃ£o implÃ­cita via SciPy sparse.
+- ðŸ“ˆ **Modelo HFT LQ** (inventÃ¡rio + custo de execuÃ§Ã£o endÃ³geno opcional).
+- ðŸ§ª **Testes**: conservaÃ§Ã£o de massa, positividade, convergÃªncia do Picard e **refinamento de malha**.
+- ðŸ§° **CLI** para rodar *baseline*, varrer parÃ¢metros e salvar artefatos (figuras, `.npy`, `metrics.json`, `summary.csv`).
+- ðŸ—ºï¸ **Config YAML** para reprodutibilidade.
 
-## Equações (visão rápida)
+## EquaÃ§Ãµes (visÃ£o rÃ¡pida)
 
 **HJB (backward)**
 
@@ -42,7 +42,7 @@ $$
 \end{cases}
 $$
 
-**Controle ótimo LQ**
+**Controle Ã³timo LQ**
 
 $$
 \begin{cases}
@@ -54,9 +54,9 @@ $$
 > **1D:** $\nabla U \equiv \partial_x U$ e $\nabla\cdot(mv)\equiv \partial_x(mv)$.
 
 ## Requisitos
-Python ≥ 3.10 · `numpy` · `scipy` · `matplotlib` · `pyyaml` · `tqdm` · `pytest`
+Python â‰¥ 3.10 Â· `numpy` Â· `scipy` Â· `matplotlib` Â· `pyyaml` Â· `tqdm` Â· `pytest`
 
-## Instalação
+## InstalaÃ§Ã£o
 ```bash
 # clone
 git clone https://github.com/<org>/mfg-finance.git
@@ -68,51 +68,62 @@ python -m venv .venv && . .venv/Scripts/activate  # Windows
 
 # instalar deps
 pip install -e .[dev]
+
+# (opcional) rodar testes rÃ¡pidos para validar setup
+PYTHONPATH=src python -m pytest -q
 ```
+
+> **Dica notebooks**: se nÃ£o quiser instalar o pacote, adicione `src/` ao `sys.path`. O notebook `notebooks/mfg_pipeline.ipynb` jÃ¡ inclui esse *bootstrap* nas primeiras cÃ©lulas.
 
 ## Como rodar
 ```bash
 # experimento baseline
 python -m mfg_finance.cli run --config configs/baseline.yaml
 
-# varredura de parâmetros (exemplo)
+# varredura de parÃ¢metros (exemplo)
 python -m mfg_finance.cli sweep --phi 0.05,0.1,0.2 --gamma_T 1.0,2.0
 ```
-Saídas ficam em `artifacts/run-YYYYmmdd-HHMMSS/` (figuras `.png`, arrays `.npy`, `metrics.json`, `summary.csv`).
+SaÃ­das ficam em `artifacts/run-YYYYmmdd-HHMMSS/` (figuras `.png`, arrays `.npy`, `metrics.json`, `summary.csv`).
 
-## Testes e validações
+### Ajustes finos do solver
+- `mix`, `mix_min`, `mix_decay` e `stagnation_tol` controlam a *under-relaxation* adaptativa do laÃ§o de Picard.
+- `relative_tol` encerra a iteraÃ§Ã£o quando a variaÃ§Ã£o relativa da densidade cai abaixo do limiar (alÃ©m do `tol` absoluto tradicional).
+- HJB interno aceita `hjb_inner` e `hjb_tol` para limitar iteraÃ§Ãµes internas.
+- Para liberar o clearing endÃ³geno, execute `python -m mfg_finance.cli run --config configs/baseline.yaml --endogenous-price`.
+
+## Testes e validaÃ§Ãµes
 ```bash
 pytest -q
 ```
-- **Massa ≈ 1** ao longo do tempo  
-- **Positividade** de `m` (pós-projeção)  
-- **Convergência do Picard** (erro decrescente)  
-- **Refinamento de malha** (norma entre soluções diminui com `nx↑, nt↑`)
+- **Massa â‰ˆ 1** ao longo do tempo  
+- **Positividade** de `m` (pÃ³s-projeÃ§Ã£o)  
+- **ConvergÃªncia do Picard** (erro decrescente)  
+- **Refinamento de malha** (norma entre soluÃ§Ãµes diminui com `nxâ†‘, ntâ†‘`)
 
 ## Estrutura (resumo)
 ```
-configs/                  # YAMLs reproducíveis
+configs/                  # YAMLs reproducÃ­veis
 data/                     # insumos brutos e processados
-examples/                 # scripts de uso rápido
-notebooks/                # notebooks exploratórios
+examples/                 # scripts de uso rÃ¡pido
+notebooks/                # notebooks exploratÃ³rios
 notebooks_output/         # resultados consolidados dos notebooks
-reports/                  # figuras e relatórios finais
+reports/                  # figuras e relatÃ³rios finais
 scripts/                  # utilidades para limpar/gerar artefatos
 src/mfg_finance/
   grid.py                 # grade e BCs
-  ops.py                  # laplaciano, grad, upwind, utilitários
+  ops.py                  # laplaciano, grad, upwind, utilitÃ¡rios
   hamiltonian.py          # H, alpha*, custos LQ
   hjb.py                  # passo backward (Lax-Friedrichs)
-  fp.py                   # passo forward (upwind + difusão implícita)
-  solver.py               # laço de Picard + métricas
-  models/hft.py           # parâmetros e densidade inicial
-  viz.py                  # plots (densidade, valor, alpha, convergência)
+  fp.py                   # passo forward (upwind + difusÃ£o implÃ­cita)
+  solver.py               # laÃ§o de Picard + mÃ©tricas
+  models/hft.py           # parÃ¢metros e densidade inicial
+  viz.py                  # plots (densidade, valor, alpha, convergÃªncia)
   cli.py                  # interface de linha de comando
 tests/
 ```
 
 ## Roadmap
-- Ruído comum / SPDE
+- RuÃ­do comum / SPDE
 - Policy iteration / Newton
-- Preço endógeno por *clearing* (opcional no CLI)
-- Extensão 2D e casos não-quadráticos
+- PreÃ§o endÃ³geno por *clearing* (opcional no CLI)
+- ExtensÃ£o 2D e casos nÃ£o-quadrÃ¡ticos

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Picard iteration driver coupling the HJB and Fokker-Planck solvers.
 """
 from __future__ import annotations
@@ -68,11 +68,15 @@ def save_metrics(metrics: Dict[str, float], path: pathlib.Path | str) -> None:
         json.dump(metrics, handle, indent=2)
 def solve_mfg_picard(
     grid: Grid1D,
-    params: HFTParams,
-    *,
-    max_iter: int = 200,
-    tol: float = 1e-8,
-    mix: float = 0.3,
+   params: HFTParams,
+   *,
+   max_iter: int = 200,
+   tol: float = 1e-8,
+   mix: float = 0.3,
+    relative_tol: float | None = None,
+    mix_min: float = 1e-4,
+    mix_decay: float = 0.5,
+    stagnation_tol: float = 0.02,
     m0: np.ndarray | None = None,
     hjb_kwargs: Dict[str, float] | None = None,
     fp_kwargs: Dict[str, float] | None = None,
@@ -95,7 +99,12 @@ def solve_mfg_picard(
     m0 = project_positive_and_renormalize(np.asarray(m0, dtype=np.float64), dx=grid.dx)
     M_k = np.tile(m0, (grid.nt + 1, 1))
     errors: List[float] = []
+    relative_errors: List[float] = []
+    mix_history: List[float] = []
     U_all = np.zeros_like(M_k)
+    current_mix = float(mix)
+    eps = 1e-12
+    stalled_flag = False
     for iteration in range(max_iter):
         U_all = solve_hjb_backward(
             M_k,
@@ -113,17 +122,59 @@ def solve_mfg_picard(
             progress=False,
             **fp_kwargs,
         )
-        M_next = mix * M_raw + (1.0 - mix) * M_k
-        diff = M_next - M_k
-        error = float(np.linalg.norm(diff.ravel()))
-        errors.append(error)
-        if callback is not None:
-            callback(iteration, error)
+        prev_error = errors[-1] if errors else None
+        candidate_mix = current_mix
+        stalled = False
+
+        while True:
+            M_next = candidate_mix * M_raw + (1.0 - candidate_mix) * M_k
+            diff = M_next - M_k
+            error_abs = float(np.linalg.norm(diff.ravel()))
+            norm_ref = float(np.linalg.norm(M_next.ravel())) + eps
+            error_rel = error_abs / norm_ref
+            if (
+                prev_error is None
+                or error_abs <= prev_error * (1.0 - stagnation_tol)
+                or candidate_mix <= mix_min + eps
+            ):
+                break
+            candidate_mix = max(candidate_mix * mix_decay, mix_min)
+
+        if prev_error is not None and error_abs > prev_error and candidate_mix <= mix_min + eps:
+            stalled = True
+            stalled_flag = True
+
+        if stalled:
+            break
+
+        current_mix = candidate_mix
         M_k = M_next
-        if error < tol:
+        errors.append(error_abs)
+        relative_errors.append(error_rel)
+        mix_history.append(float(current_mix))
+
+        if callback is not None:
+            callback(iteration, error_abs)
+
+        absolute_check = error_abs < tol
+        relative_check = relative_tol is not None and error_rel < relative_tol
+        if absolute_check or relative_check:
             break
     alpha_all = compute_alpha_traj(U_all, M_k, grid, params, eta_callback=eta_callback)
     metrics = compute_alpha_metrics(alpha_all)
+    final_error = errors[-1] if errors else 0.0
+    final_error_rel = relative_errors[-1] if relative_errors else 0.0
+    metrics.update(
+        final_error=final_error,
+        final_error_relative=final_error_rel,
+        iterations=len(errors),
+        mix_initial=float(mix),
+        mix_final=float(current_mix),
+        mix_min=float(mix_min),
+        mix_history=mix_history,
+        relative_errors=relative_errors,
+        stalled=stalled_flag,
+    )
     if metrics_path is not None:
         save_metrics(metrics, metrics_path)
     return U_all, M_k, alpha_all, errors, metrics
@@ -137,6 +188,10 @@ class MeanFieldGameSolver:
     max_iter: int = 200
     tol: float = 1e-8
     mix: float = 0.3
+    relative_tol: float | None = None
+    mix_min: float = 1e-4
+    mix_decay: float = 0.5
+    stagnation_tol: float = 0.02
     hjb_kwargs: Dict[str, float] | None = None
     fp_kwargs: Dict[str, float] | None = None
     eta_callback: EtaCallback | None = None
@@ -154,6 +209,10 @@ class MeanFieldGameSolver:
             max_iter=self.max_iter,
             tol=self.tol,
             mix=self.mix,
+            relative_tol=self.relative_tol,
+            mix_min=self.mix_min,
+            mix_decay=self.mix_decay,
+            stagnation_tol=self.stagnation_tol,
             m0=initial_density,
             hjb_kwargs=self.hjb_kwargs,
             fp_kwargs=self.fp_kwargs,
