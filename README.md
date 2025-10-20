@@ -52,7 +52,7 @@ $$
 ![Preco endogeno](notebooks_output/run-20251020-150052/price.png)
 *Trajetoria do preco de clearing calibrado para media quase nula; oscilacoes refletem a oferta empirica.*
 
-Para reproduzir o painel sem abrir o Jupyter execute `python scripts/run_notebook_pipeline.py`.
+> Para reproduzir o painel sem abrir o Jupyter execute `python scripts/run_notebook_pipeline.py`.
 
 ## Interpretacao de mercado (dados 1986–2025)
 - O clearing encontra preco medio praticamente zero (`price_mean ~ 4e-05` e faixa total ~1.9e-04), indicando que as curvas de oferta e demanda agregadas se equilibram sem empurrar o mercado.
@@ -135,6 +135,7 @@ tests/                    # suite PyTest
 - Implementar policy iteration / Newton para aceleracao.
 - Preco endogeno via mecanismos de clearing alternativos.
 - Extensoes 2D e problemas nao quadraticos.
+
 
 
 
