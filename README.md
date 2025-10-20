@@ -42,19 +42,19 @@ abla U \equiv \partial_x U$ e $
 abla\cdot(mv) \equiv \partial_x(mv)$.
 
 ## Pipeline visual
-![Distribuicao](notebooks_output/run-20251020-032945/density_small.png)
+![Distribuicao](notebooks_output/run-20251020-150052/density_small.png)
 *Distribuicao do FP ao longo do tempo; a massa permanece conservada.*
 
-![Funcao valor](notebooks_output/run-20251020-032945/value_function_small.png)
+![Funcao valor](notebooks_output/run-20251020-150052/value_function_small.png)
 *Funcao valor do HJB mostrando o custo futuro e o impacto das bordas.*
 
-![Politica otima](notebooks_output/run-20251020-032945/alpha_cuts_small.png)
-*Quatro cortes da politica otima $lpha(t,x)$ evidenciam o alisamento do controle.*
+![Politica otima](notebooks_output/run-20251020-150052/alpha_cuts_small.png)
+*Quatro cortes da politica otima $alpha(t,x)$ evidenciam o alisamento do controle.*
 
-![Convergencia](notebooks_output/run-20251020-032945/convergence_small.png)
+![Convergencia](notebooks_output/run-20251020-150052/convergence_small.png)
 *Erro $L^2$ entre iteracoes Picard; a queda monotonica confirma estabilidade.*
 
-![Preco endogeno](notebooks_output/run-20251020-032945/price_small.png)
+![Preco endogeno](notebooks_output/run-20251020-150052/price_small.png)
 *Trajetoria do preco de clearing calibrado para media quase nula; oscilacoes refletem a oferta empirica.*
 
 Para reproduzir o painel sem abrir o Jupyter execute `python scripts/run_notebook_pipeline.py`.
@@ -140,4 +140,5 @@ tests/                    # suite PyTest
 - Implementar policy iteration / Newton para aceleracao.
 - Preco endogeno via mecanismos de clearing alternativos.
 - Extensoes 2D e problemas nao quadraticos.
+
 
