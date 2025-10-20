@@ -1,6 +1,4 @@
 # mfg-finance
-**Solver de Mean Field Games (MFG) para finanças** em 1D, acoplando **Hamilton–Jacobi–Bellman (HJB)** e **Fokker–Planck (FP)** com **iteração de Picard**, **Lax-Friedrichs** no HJB e **upwind conservativo** no FP. O projeto inclui CLI, experimentos reprodutíveis, métricas e testes de massa/positividade/convergência.
-
 O projeto conecta otimização individual e efeitos de multidão no mercado. Em vez de modelar um trader isolado, usa-se a estrutura de Mean Field Games (MFG): cada agente escolhe suas ações para minimizar custos (por exemplo, custo de execução e carregar inventário), enquanto a média das escolhas afeta o ambiente que todos enfrentam.
 
 ### **O que o código faz**
