@@ -23,9 +23,28 @@ Esse arranjo permite experimentar hipóteses de mercado de forma controlada: com
 - 🗺️ **Config YAML** para reprodutibilidade.
 
 ## Equações (visão rápida)
-- **HJB (backward)**: \(-\partial_t U - \nu \Delta U + H(\nabla U, m) = 0\), \(U(T,x)=\gamma_T x^2\)  
-- **FP (forward)**: \(\partial_t m - \nu \Delta m - \nabla\cdot(m\,v)=0\), \(m(0,x)=m_0(x)\)  
-- **Controle ótimo LQ**: \(\alpha^{\*} = -\partial_x U / \eta(m)\), com \(\eta(m)=\eta_0+\eta_1\,|\overline{\alpha}|\)
+**HJB (backward)**  
+$$
+-\partial_t U(t,x)\;-\;\nu\,\Delta U(t,x)\;+\;H\!\big(\nabla U(t,x),\, m(t,x)\big)\;=\;0,
+\qquad
+U(T,x)=\gamma_T x^2.
+$$
+
+**FP (forward)**  
+$$
+\partial_t m(t,x)\;-\;\nu\,\Delta m(t,x)\;-\;\nabla\!\cdot\!\big(m(t,x)\,v(t,x)\big)\;=\;0,
+\qquad
+m(0,x)=m_0(x).
+$$
+
+**Controle ótimo LQ**  
+$$
+\alpha^{*}(t,x)\;=\;-\frac{\partial_x U(t,x)}{\eta(m)},
+\qquad
+\eta(m)=\eta_0+\eta_1\,\big|\overline{\alpha}\big|.
+$$
+
+> **Nota:** Em 1D, pode-se usar $\nabla U \equiv \partial_x U$ e $\nabla\!\cdot(mv)\equiv \partial_x(mv)$.
 
 ## Requisitos
 Python ≥ 3.10 · `numpy` · `scipy` · `matplotlib` · `pyyaml` · `tqdm` · `pytest`
