@@ -27,10 +27,10 @@ Esse arranjo permite experimentar hipóteses de mercado de forma controlada: com
 **HJB (backward)**
 
 $$
-\begin{aligned}
+\begin{cases}
 & -\partial_t U(t,x) - \nu \Delta U(t,x) + H(\nabla U(t,x), m(t,x)) = 0 \\
 & U(T,x) = \gamma_T x^2
-\end{aligned}
+\end{cases}
 $$
 
 **FP (forward)**
