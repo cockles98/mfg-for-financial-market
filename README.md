@@ -1,8 +1,18 @@
 # mfg-finance
 **Solver de Mean Field Games (MFG) para finanças** em 1D, acoplando **Hamilton–Jacobi–Bellman (HJB)** e **Fokker–Planck (FP)** com **iteração de Picard**, **Lax-Friedrichs** no HJB e **upwind conservativo** no FP. O projeto inclui CLI, experimentos reprodutíveis, métricas e testes de massa/positividade/convergência.
 
-## Descrição curta (About)
-> Mean Field Games para finanças: solver 1D HJB–Fokker-Planck com iteração de Picard, esquema monotônico (Lax-Friedrichs), upwind conservativo e varreduras de parâmetros.
+O projeto conecta otimização individual e efeitos de multidão no mercado. Em vez de modelar um trader isolado, usa-se a estrutura de Mean Field Games (MFG): cada agente escolhe suas ações para minimizar custos (por exemplo, custo de execução e carregar inventário), enquanto a média das escolhas afeta o ambiente que todos enfrentam.
+
+### **O que o código faz**
+- Resolve duas equações acopladas no tempo:
+- HJB (decisão ótima): calcula o “valor” de cada estado e a política ótima de negociação.
+- Fokker-Planck (população): descreve como a distribuição de posições dos agentes evolui.
+- Encontra o equilíbrio por um laço de ponto-fixo (Picard), alternando HJB (para trás no tempo) e FP (para frente) até convergir.
+- Usa esquemas numéricos estáveis reconhecidos na literatura: Lax-Friedrichs (gradiente monotônico) e upwind conservativo (advecção), com difusão implícita. Isso preserva massa ≈ 1 e impede densidades negativas — requisitos básicos para resultados confiáveis.
+-Implementa um caso LQ (quadrático) inspirado em microestrutura/HFT: custo de execução, penalidade de inventário e (opcionalmente) custo dependente do fluxo médio do grupo.
+
+### **Por que isso importa**
+Esse arranjo permite experimentar hipóteses de mercado de forma controlada: como a liquidez muda quando negociar fica mais caro? O grupo tende a carregar mais ou menos inventário? A política ótima fica mais agressiva ou mais cautelosa? Os gráficos e métricas ajudam a visualizar esses regimes.
 
 ## Destaques
 - 🔁 **HJB ↔ FP** com laço de **Picard** e *under-relaxation*.
