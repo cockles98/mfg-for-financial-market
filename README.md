@@ -39,6 +39,7 @@ $$
 *Distribuição do FP ao longo do tempo; a massa permanece conservada.*
 ![Distribuição](notebooks_output/run-20251020-005200/density_small.png)
 
+
 *Função valor do HJB mostrando o custo futuro e o impacto das bordas.*
 ![Função valor](notebooks_output/run-20251020-005200/value_function_small.png)
 
@@ -126,6 +127,7 @@ tests/                    # suíte PyTest
 - Implementar policy iteration / Newton para aceleração.
 - Preço endógeno via mecanismos de clearing alternativos.
 - Extensões 2D e problemas não quadráticos.
+
 
 
 
