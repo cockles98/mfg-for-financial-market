@@ -91,18 +91,24 @@ pytest -q
 
 ## Estrutura (resumo)
 ```
+configs/                  # YAMLs reproducíveis
+data/                     # insumos brutos e processados
+examples/                 # scripts de uso rápido
+notebooks/                # notebooks exploratórios
+notebooks_output/         # resultados consolidados dos notebooks
+reports/                  # figuras e relatórios finais
+scripts/                  # utilidades para limpar/gerar artefatos
 src/mfg_finance/
-  grid.py        # grade e BCs
-  ops.py         # laplaciano, grad, upwind, utilitários
-  hamiltonian.py # H, alpha*, custos LQ
-  hjb.py         # passo backward (Lax-Friedrichs)
-  fp.py          # passo forward (upwind + difusão implícita)
-  solver.py      # laço de Picard + métricas
-  models/hft.py  # parâmetros e densidade inicial
-  viz.py         # plots (densidade, valor, alpha, convergência)
-  cli.py         # interface de linha de comando
-configs/baseline.yaml
-tests/...
+  grid.py                 # grade e BCs
+  ops.py                  # laplaciano, grad, upwind, utilitários
+  hamiltonian.py          # H, alpha*, custos LQ
+  hjb.py                  # passo backward (Lax-Friedrichs)
+  fp.py                   # passo forward (upwind + difusão implícita)
+  solver.py               # laço de Picard + métricas
+  models/hft.py           # parâmetros e densidade inicial
+  viz.py                  # plots (densidade, valor, alpha, convergência)
+  cli.py                  # interface de linha de comando
+tests/
 ```
 
 ## Roadmap
