@@ -60,8 +60,6 @@ $$
 
 ![Preço endógeno](notebooks_output/run-20251020-005200/price_small.png)
 
-Para reproduzir o painel sem abrir o Jupyter execute `python scripts/run_notebook_pipeline.py`.
-
 ## Instalação
 ```bash
 git clone https://github.com/<org>/mfg-for-financial-market.git
@@ -135,6 +133,7 @@ tests/                    # suíte PyTest
 - Implementar policy iteration / Newton para aceleração.
 - Preço endógeno via mecanismos de clearing alternativos.
 - Extensões 2D e problemas não quadráticos.
+
 
 
 
