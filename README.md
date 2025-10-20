@@ -60,6 +60,19 @@ $$
 - A densidade de inventario fica concentrada no centro; agentes retornam rapidamente a posicoes neutras, coerente com penalidades terminais altas (`gamma_T = 0.146815`).
 - A calibracao empirica resulta em parametros: `nu = 5.2e-05`, `phi = 2.09e-04`, `eta0 = 1.0e-04`, `eta1 = 7.1428e-02`. Esses valores refletem spreads historicos maiores quando incorporamos COTAHIST 1986–2025.
 
+## Ajustes finos
+- `mix`, `mix_min`, `mix_decay`, `stagnation_tol`: controlam o amortecimento do Picard.
+- `relative_tol`: criterio relativo adicional (alem do `tol` absoluto) para encerrar o laco.
+- `hjb_inner` / `hjb_tol`: esforco interno do solver HJB.
+- `solver.supply` e `solver.price_sensitivity`: curva empirica de oferta e sensibilidade de clearing (ver proxima secao). O baseline usa `price_sensitivity = 30.0`, obtendo preco medio ~0.
+
+### Metricas salvas
+`metrics.json` inclui:
+- `final_error`, `final_error_relative`, `iterations`
+- `mix_history`, `relative_errors`
+- `mean_abs_alpha`, `std_alpha`, `liquidity_proxy`
+- `price_mean`, `price_std`, `price_min`, `price_max`, `price_span`
+
 ## Instalacao
 ```bash
 git clone https://github.com/<org>/mfg-for-financial-market.git
@@ -80,19 +93,6 @@ python -m mfg_finance.cli run --config configs/baseline.yaml --endogenous-price
 python -m mfg_finance.cli sweep   --config configs/baseline.yaml   --phi 0.02,0.035359,0.05   --gamma_T 0.4,2.778412
 ```
 Artefatos vao para `artifacts/run-YYYYmmdd-HHMMSS/` ou `artifacts/sweep-.../` com arrays (`*.npy`), metricas (`metrics.json`), curvas de preco (`price.csv`) e figuras (`*.png`).
-
-## Ajustes finos
-- `mix`, `mix_min`, `mix_decay`, `stagnation_tol`: controlam o amortecimento do Picard.
-- `relative_tol`: criterio relativo adicional (alem do `tol` absoluto) para encerrar o laco.
-- `hjb_inner` / `hjb_tol`: esforco interno do solver HJB.
-- `solver.supply` e `solver.price_sensitivity`: curva empirica de oferta e sensibilidade de clearing (ver proxima secao). O baseline usa `price_sensitivity = 30.0`, obtendo preco medio ~0.
-
-### Metricas salvas
-`metrics.json` inclui:
-- `final_error`, `final_error_relative`, `iterations`
-- `mix_history`, `relative_errors`
-- `mean_abs_alpha`, `std_alpha`, `liquidity_proxy`
-- `price_mean`, `price_std`, `price_min`, `price_max`, `price_span`
 
 ## Dados e reproducao
 1. **Ingestao COTAHIST (1986–2025):** posicione os arquivos anuais em `data/b3/` e rode:
@@ -135,6 +135,7 @@ tests/                    # suite PyTest
 - Implementar policy iteration / Newton para aceleracao.
 - Preco endogeno via mecanismos de clearing alternativos.
 - Extensoes 2D e problemas nao quadraticos.
+
 
 
 
