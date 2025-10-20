@@ -5,13 +5,12 @@ Solver numérico de **Mean Field Games (MFG)** em 1D aplicado à microestrutura 
 O modelo conecta decisões individuais de agentes de alta frequência a efeitos agregados (campo médio). Cada agente decide esforços de negociação para minimizar custos de execução e inventário, enquanto a média das decisões retroalimenta o ambiente enfrentado por todos. O solver busca o equilíbrio alternando HJB (valor) e FP (densidade) com amortecimento adaptativo.
 
 ## Equações (visão rápida)
+
 **HJB (backward)**
 
 $$
-egin{aligned}
-& -\partial_t U(t,x) - 
-u \Delta U(t,x) + H(
-abla U(t,x), m(t,x)) = 0 \
+\begin{aligned}
+& -\partial_t U(t,x) - \nu \Delta U(t,x) + H(\nabla U(t,x), m(t,x)) = 0 \\
 & U(T,x) = \gamma_T x^2
 \end{aligned}
 $$
@@ -19,10 +18,8 @@ $$
 **FP (forward)**
 
 $$
-egin{aligned}
-& \partial_t m(t,x) - 
-u \Delta m(t,x) - 
-abla\cdotig(m(t,x)v(t,x)ig) = 0 \
+\begin{aligned}
+& \partial_t m(t,x) - \nu \Delta m(t,x) - \nabla\cdot\big(m(t,x)v(t,x)\big) = 0 \\
 & m(0,x) = m_0(x)
 \end{aligned}
 $$
@@ -30,15 +27,13 @@ $$
 **Controle ótimo LQ**
 
 $$
-egin{aligned}
-& lpha^{*}(t,x) = -rac{\partial_x U(t,x)}{\eta(m)} \
-& \eta(m) = \eta_0 + \eta_1 \lvert \overline{lpha} vert
+\begin{aligned}
+& \alpha^{*}(t,x) = -\frac{\partial_x U(t,x)}{\eta(m)} \\
+& \eta(m) = \eta_0 + \eta_1 \lvert \overline{\alpha} \rvert
 \end{aligned}
 $$
 
-> **1D:** $
-abla U \equiv \partial_x U$ e $
-abla\cdot(mv) \equiv \partial_x(mv)$.
+> **1D:** $\nabla U \equiv \partial_x U$ e $\nabla\cdot(mv)\equiv \partial_x(mv)$.
 
 ## Pipeline visual
 ![Distribuição](notebooks_output/run-20251020-005200/density_small.png)
@@ -131,3 +126,4 @@ tests/                    # suíte PyTest
 - Implementar policy iteration / Newton para aceleração.
 - Preço endógeno via mecanismos de clearing alternativos.
 - Extensões 2D e problemas não quadráticos.
+
