@@ -9,8 +9,8 @@ params:
   nu: 0.001985
   phi: 0.035359
   gamma_T: 0.568862
-  eta0: 0.5
-  eta1: 0.8
+  eta0: 0.000555
+  eta1: 0.029442
   m0_mean: 0.0
   m0_std: 1.0
 solver:
