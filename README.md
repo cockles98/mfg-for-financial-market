@@ -4,14 +4,13 @@ Solver numerico de **Mean Field Games (MFG)** em 1D aplicado a microestrutura da
 ## Visao geral
 O modelo conecta decisoes individuais de agentes de alta frequencia a efeitos agregados (campo medio). Cada agente decide esforcos de negociacao para minimizar custos de execucao e inventario, enquanto a media das decisoes retroalimenta o ambiente enfrentado por todos. O solver busca o equilibrio alternando HJB (valor) e FP (densidade) com amortecimento adaptativo.
 
-## Equacoes (visao rapida)
+## Equações (visão rápida)
+
 **HJB (backward)**
 
 $$
 \begin{cases}
-& -\partial_t U(t,x) - 
-u \Delta U(t,x) + H(
-abla U(t,x), m(t,x)) = 0 \
+& -\partial_t U(t,x) - \nu \Delta U(t,x) + H(\nabla U(t,x), m(t,x)) = 0 \\
 & U(T,x) = \gamma_T x^2
 \end{cases}
 $$
@@ -19,42 +18,38 @@ $$
 **FP (forward)**
 
 $$
-egin{aligned}
-& \partial_t m(t,x) - 
-u \Delta m(t,x) - 
-abla\cdotig(m(t,x)v(t,x)ig) = 0 \
+\begin{cases}
+& \partial_t m(t,x) - \nu \Delta m(t,x) - \nabla\cdot\big(m(t,x)v(t,x)\big) = 0 \\
 & m(0,x) = m_0(x)
-\end{aligned}
+\end{cases}
 $$
 
-**Controle otimo LQ**
+**Controle ótimo LQ**
 
 $$
-egin{aligned}
-& lpha^{*}(t,x) = -rac{\partial_x U(t,x)}{\eta(m)} \
-& \eta(m) = \eta_0 + \eta_1 \lvert \overline{lpha} 
-vert
-\end{aligned}
+\begin{cases}
+& \alpha^{*}(t,x) = -\frac{\partial_x U(t,x)}{\eta(m)} \\
+& \eta(m) = \eta_0 + \eta_1 \lvert \overline{\alpha} \rvert
+\end{cases}
 $$
 
-> **1D:** $
-abla U \equiv \partial_x U$ e $
-abla\cdot(mv) \equiv \partial_x(mv)$.
+> **1D:** $\nabla U \equiv \partial_x U$ e $\nabla\cdot(mv)\equiv \partial_x(mv)$.
+
 
 ## Pipeline visual
-![Distribuicao](notebooks_output/run-20251020-150052/density_small.png)
+![Distribuicao](notebooks_output/run-20251020-150052/density.png)
 *Distribuicao do FP ao longo do tempo; a massa permanece conservada.*
 
-![Funcao valor](notebooks_output/run-20251020-150052/value_function_small.png)
+![Funcao valor](notebooks_output/run-20251020-150052/value_function.png)
 *Funcao valor do HJB mostrando o custo futuro e o impacto das bordas.*
 
-![Politica otima](notebooks_output/run-20251020-150052/alpha_cuts_small.png)
+![Politica otima](notebooks_output/run-20251020-150052/alpha_cuts.png)
 *Quatro cortes da politica otima $alpha(t,x)$ evidenciam o alisamento do controle.*
 
-![Convergencia](notebooks_output/run-20251020-150052/convergence_small.png)
+![Convergencia](notebooks_output/run-20251020-150052/convergence.png)
 *Erro $L^2$ entre iteracoes Picard; a queda monotonica confirma estabilidade.*
 
-![Preco endogeno](notebooks_output/run-20251020-150052/price_small.png)
+![Preco endogeno](notebooks_output/run-20251020-150052/price.png)
 *Trajetoria do preco de clearing calibrado para media quase nula; oscilacoes refletem a oferta empirica.*
 
 Para reproduzir o painel sem abrir o Jupyter execute `python scripts/run_notebook_pipeline.py`.
@@ -140,5 +135,6 @@ tests/                    # suite PyTest
 - Implementar policy iteration / Newton para aceleracao.
 - Preco endogeno via mecanismos de clearing alternativos.
 - Extensoes 2D e problemas nao quadraticos.
+
 
 
