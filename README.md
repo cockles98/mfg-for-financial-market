@@ -1,150 +1,97 @@
-﻿# Mean Field Game Theory na bolsa brasileira
-Solver de **Mean Field Games (MFG)** para finanÃ§as em 1D, acoplando **Hamiltonâ€“Jacobiâ€“Bellman (HJB)** e **Fokkerâ€“Planck (FP)** com iteraÃ§Ã£o de Picard, Lax-Friedrichs no HJB e upwind conservativo no FP. O projeto inclui CLI, experimentos reprodutÃ­veis, mÃ©tricas e testes de massa/positividade/convergÃªncia.
+# Mean Field Games para o mercado brasileiro
+Solver numérico de **Mean Field Games (MFG)** em 1D aplicado à microestrutura da B3. O sistema acopla **Hamilton–Jacobi–Bellman (HJB)** e **Fokker–Planck (FP)** por iteração de Picard com esquemas conservativos (Lax-Friedrichs + upwind). O projeto fornece CLI, notebook, scripts de dados e testes automatizados.
 
-Resumidamente, o projeto conecta otimizaÃ§Ã£o individual e efeitos de multidÃ£o no mercado. Em vez de modelar um trader isolado, usa-se a estrutura de Mean Field Games (MFG): cada agente escolhe suas aÃ§Ãµes para minimizar custos (por exemplo, custo de execuÃ§Ã£o e carregar inventÃ¡rio), enquanto a mÃ©dia das escolhas afeta o ambiente que todos enfrentam.
+## Visão geral
+O modelo liga decisões individuais de agentes de alta frequência a efeitos agregados (“campo médio”). Cada agente escolhe esforços de negociação para minimizar custos de execução e inventário, enquanto a média das escolhas influencia o ambiente enfrentado por todos. O solver busca o equilíbrio fixando valor (HJB) e densidade (FP) em ciclos Picard com amortecimento adaptativo.
 
-### **O que o cÃ³digo faz**
-- Resolve duas equaÃ§Ãµes acopladas no tempo:
-  - HJB (decisÃ£o Ã³tima): calcula o â€œvalorâ€ de cada estado e a polÃ­tica Ã³tima de negociaÃ§Ã£o.
-  - Fokker-Planck (populaÃ§Ã£o): descreve como a distribuiÃ§Ã£o de posiÃ§Ãµes dos agentes evolui.
-- Encontra o equilÃ­brio por um laÃ§o de ponto-fixo (Picard), alternando HJB (para trÃ¡s no tempo) e FP (para frente) atÃ© convergir.
-- Usa esquemas numÃ©ricos estÃ¡veis reconhecidos na literatura: Lax-Friedrichs (gradiente monotÃ´nico) e upwind conservativo (advecÃ§Ã£o), com difusÃ£o implÃ­cita. Isso preserva massa â‰ˆ 1 e impede densidades negativas â€” requisitos bÃ¡sicos para resultados confiÃ¡veis.
--Implementa um caso LQ (quadrÃ¡tico) inspirado em microestrutura/HFT: custo de execuÃ§Ã£o, penalidade de inventÃ¡rio e (opcionalmente) custo dependente do fluxo mÃ©dio do grupo.
+### Principais funcionalidades
+- **HJB + FP acopladas** com controle LQ e custo endógeno via `eta(m)`.
+- **Convergência robusta**: mixagem adaptativa, tolerâncias absoluta/relativa e registro de métricas (`metrics.json`).
+- **Dados reais da B3** (COTAHIST 2015–2025) para calibrar volatilidade, curva de oferta e spreads.
+- **Ferramentas de reproducibilidade**: scripts para construir `supply_curve.csv`, atualizar `baseline.yaml` e executar o pipeline sem Jupyter.
+- **CLI e notebook** para rodar baseline, varrer parâmetros e gerar relatórios completos (`.npy`, `.csv`, `.png`, `metrics.json`).  
 
-### **Por que isso importa**
-Esse arranjo permite experimentar hipÃ³teses de mercado de forma controlada: como a liquidez muda quando negociar fica mais caro? O grupo tende a carregar mais ou menos inventÃ¡rio? A polÃ­tica Ã³tima fica mais agressiva ou mais cautelosa? Os grÃ¡ficos e mÃ©tricas ajudam a visualizar esses regimes.
-
-## Destaques
-- ðŸ” **HJB â†” FP** com laÃ§o de **Picard** e *under-relaxation*.
-- ðŸ§® **Esquemas numÃ©ricos estÃ¡veis**: Lax-Friedrichs (grad monotÃ´nico) e upwind conservativo (advecÃ§Ã£o), difusÃ£o implÃ­cita via SciPy sparse.
-- ðŸ“ˆ **Modelo HFT LQ** (inventÃ¡rio + custo de execuÃ§Ã£o endÃ³geno opcional).
-- ðŸ§ª **Testes**: conservaÃ§Ã£o de massa, positividade, convergÃªncia do Picard e **refinamento de malha**.
-- ðŸ§° **CLI** para rodar *baseline*, varrer parÃ¢metros e salvar artefatos (figuras, `.npy`, `metrics.json`, `summary.csv`).
-- ðŸ—ºï¸ **Config YAML** para reprodutibilidade.
-
-## EquaÃ§Ãµes (visÃ£o rÃ¡pida)
-
-**HJB (backward)**
-
-$$
-\begin{cases}
-& -\partial_t U(t,x) - \nu \Delta U(t,x) + H(\nabla U(t,x), m(t,x)) = 0 \\
-& U(T,x) = \gamma_T x^2
-\end{cases}
-$$
-
-**FP (forward)**
-
-$$
-\begin{cases}
-& \partial_t m(t,x) - \nu \Delta m(t,x) - \nabla\cdot\big(m(t,x)v(t,x)\big) = 0 \\
-& m(0,x) = m_0(x)
-\end{cases}
-$$
-
-**Controle Ã³timo LQ**
-
-$$
-\begin{cases}
-& \alpha^{*}(t,x) = -\frac{\partial_x U(t,x)}{\eta(m)} \\
-& \eta(m) = \eta_0 + \eta_1 \lvert \overline{\alpha} \rvert
-\end{cases}
-$$
-
-> **1D:** $\nabla U \equiv \partial_x U$ e $\nabla\cdot(mv)\equiv \partial_x(mv)$.
-
-## Requisitos
-Python â‰¥ 3.10 Â· `numpy` Â· `scipy` Â· `matplotlib` Â· `pyyaml` Â· `tqdm` Â· `pytest`
-
-## InstalaÃ§Ã£o
+## Instalação
 ```bash
-# clone
-git clone https://github.com/<org>/mfg-finance.git
-cd mfg-finance
-
-# (opcional) criar venv
+git clone https://github.com/<org>/mfg-for-financial-market.git
+cd mfg-for-financial-market
 python -m venv .venv && . .venv/Scripts/activate  # Windows
 # source .venv/bin/activate                       # macOS/Linux
-
-# instalar deps
 pip install -e .[dev]
-
-# (opcional) rodar testes rÃ¡pidos para validar setup
-PYTHONPATH=src python -m pytest -q
+PYTHONPATH=src python -m pytest -q                # smoke opcional
 ```
-
-> **Dica notebooks**: se nÃ£o quiser instalar o pacote, adicione `src/` ao `sys.path`. O notebook `notebooks/mfg_pipeline.ipynb` jÃ¡ inclui esse *bootstrap* nas primeiras cÃ©lulas.
+> **Notebook**: se não instalar o pacote, basta garantir que `src/` está no `sys.path`. O notebook `notebooks/mfg_pipeline.ipynb` já faz isso na primeira célula.
 
 ## Como rodar
 ```bash
-# experimento baseline
-python -m mfg_finance.cli run --config configs/baseline.yaml
+# baseline com clearing endógeno
+python -m mfg_finance.cli run --config configs/baseline.yaml --endogenous-price
 
-# varredura de parÃ¢metros (exemplo)
-python -m mfg_finance.cli sweep --phi 0.02,0.035359,0.05 --gamma_T 0.4,0.568862
-```
-SaÃ­das ficam em `artifacts/run-YYYYmmdd-HHMMSS/` (figuras `.png`, arrays `.npy`, `metrics.json`, `summary.csv`).
-
-### Ajustes finos do solver
-- `mix`, `mix_min`, `mix_decay` e `stagnation_tol` controlam a *under-relaxation* adaptativa do laço de Picard.
-- `relative_tol` encerra a iteração quando a variação relativa da densidade cai abaixo do limiar (além do `tol` absoluto tradicional).
-- HJB interno aceita `hjb_inner` e `hjb_tol` para limitar iterações internas.
-- O clearing endógeno já vem habilitado em `configs/baseline.yaml`: a curva de oferta em `solver.supply` vem do script `scripts/build_supply_curve.py` (COTAHIST 2015-2025) e é normalizada por `scripts/update_solver_config.py`. A sensibilidade padrão `solver.price_sensitivity = 30.0` garante preço médio ≈ 0; ajuste conforme necessidade.
-- Para testar regimes alternativos execute `python -m mfg_finance.cli run --config configs/baseline.yaml --endogenous-price`.
-
-### Sweeps rápidos
-Use a CLI para varrer parâmetros e validar estabilidade com os dados calibrados:
-
-```bash
-python -m mfg_finance.cli sweep ^
-  --config configs/baseline.yaml ^
-  --phi 0.02,0.035359,0.05 ^
+# sweep de parâmetros (φ x γ_T)
+python -m mfg_finance.cli sweep \
+  --config configs/baseline.yaml \
+  --phi 0.02,0.035359,0.05 \
   --gamma_T 0.4,0.568862
 ```
+Artefatos são gerados em `artifacts/run-YYYYmmdd-HHMMSS/` ou `artifacts/sweep-.../` com arrays (`*.npy`), métricas (`metrics.json`), curvas de preço (`price.csv`) e figuras (`*.png`).
 
-O comando gera `artifacts/sweep-YYYYmmdd-HHMMSS/summary.csv` com métricas (erro final, |alpha| médio, proxy de liquidez e estatísticas de preço quando o clearing converge). Ajuste as listas conforme o experimento.
+### Ajustes finos
+- `mix`, `mix_min`, `mix_decay`, `stagnation_tol`: controlam o amortecimento do Picard.
+- `relative_tol`: critério relativo adicional (além do `tol` absoluto) para parar o laço.
+- `hjb_inner` / `hjb_tol`: esforço interno do solver HJB.
+- `solver.supply` e `solver.price_sensitivity`: curva empírica de oferta e sensibilidade de clearing (ver seção “Dados”). O baseline usa `price_sensitivity = 30.0`, resultando em preço médio ≈ 0.
+- Para gerar os artefatos do notebook sem abrir o Jupyter:  
+  `python scripts/run_notebook_pipeline.py`
 
-### Dados e reprodutibilidade
-- Os insumos vêm do **COTAHIST/B3 (2015–2025)**; veja `docs/DATA.md` para detalhes legais e passos de preparação.
-- Reconstrua o resumo de oferta com `python scripts/build_supply_curve.py` (exige `data/processed/cotahist_equities_extended.parquet`).
-- Propague a curva para o solver rodando `python scripts/update_solver_config.py` (opções `--scale`, `--price-sensitivity` e `--samples` replicam o `baseline`).
-- Para gerar os artefatos do notebook sem depender do Jupyter use python scripts/run_notebook_pipeline.py.
-- As execuções escrevem `metrics.json` com erros absolutos/relativos e estatísticas de preço (`price_mean`, `price_std`, `price_min`, `price_max`, `price_span`).
+### Métricas
+`metrics.json` (CLI/notebook) inclui:
+- `final_error`, `final_error_relative`, `iterations`
+- `mix_history`, `relative_errors`
+- `mean_abs_alpha`, `std_alpha`, `liquidity_proxy`
+- `price_mean`, `price_std`, `price_min`, `price_max`, `price_span` (quando o clearing roda)
 
-## Testes e validaÃ§Ãµes
+## Dados e reprodução
+1. **Ingestão COTAHIST** (não versionada): copie os arquivos originais para `data/raw/` e use os scripts da pasta `scripts/` para gerar os Parquets em `data/processed/` (ver `docs/DATA.md`).  
+2. **Curva de oferta** (volume/spread por quantil):
+   ```bash
+   python scripts/build_supply_curve.py \
+     --input data/processed/cotahist_equities_extended.parquet \
+     --output data/processed/supply_curve.csv
+   ```
+3. **Atualizar baseline** com a curva e sensibilidade desejada:
+   ```bash
+   python scripts/update_solver_config.py \
+     --supply data/processed/supply_curve.csv \
+     --config configs/baseline.yaml \
+     --scale 5e-05 \
+     --price-sensitivity 30.0
+   ```
+4. Opcional, executar `scripts/run_notebook_pipeline.py` para replicar o notebook completo e salvar os artefatos em `notebooks_output/run-YYYYmmdd-HHMMSS/`.
+
+> **Aviso legal:** dados COTAHIST pertencem à B3 e não são redistribuídos aqui. Certifique-se de possuir licença antes de executar os scripts.
+
+## Testes
 ```bash
-pytest -q
+PYTHONPATH=src python -m pytest -q
 ```
-- **Massa â‰ˆ 1** ao longo do tempo  
-- **Positividade** de `m` (pÃ³s-projeÃ§Ã£o)  
-- **ConvergÃªncia do Picard** (erro decrescente)  
-- **Refinamento de malha** (norma entre soluÃ§Ãµes diminui com `nxâ†‘, ntâ†‘`)
+Os testes cobrem conservação de massa, positividade, convergência Picard e refinamento de malha.
 
-## Estrutura (resumo)
+## Estrutura do repositório
 ```
-configs/                  # YAMLs reproducÃ­veis
-docs/                     # notas sobre dados e reprodução
-data/                     # insumos brutos e processados
-examples/                 # scripts de uso rÃ¡pido
-notebooks/                # notebooks exploratÃ³rios
-notebooks_output/         # resultados consolidados dos notebooks
-reports/                  # figuras e relatÃ³rios finais
-scripts/                  # utilidades para limpar/gerar artefatos
-src/mfg_finance/
-  grid.py                 # grade e BCs
-  ops.py                  # laplaciano, grad, upwind, utilitÃ¡rios
-  hamiltonian.py          # H, alpha*, custos LQ
-  hjb.py                  # passo backward (Lax-Friedrichs)
-  fp.py                   # passo forward (upwind + difusÃ£o implÃ­cita)
-  solver.py               # laÃ§o de Picard + mÃ©tricas
-  models/hft.py           # parÃ¢metros e densidade inicial
-  viz.py                  # plots (densidade, valor, alpha, convergÃªncia)
-  cli.py                  # interface de linha de comando
-tests/
+configs/                  # YAMLs reprodutíveis (baseline, sweeps)
+docs/                     # documentação adicional (ex.: DATA.md)
+data/                     # insumos brutos/derivados (não versionados)
+examples/                 # scripts de experimentos rápidos
+notebooks/                # notebooks exploratórios
+notebooks_output/         # artefatos gerados pelo pipeline
+reports/                  # figuras e relatórios HTML/PNG
+scripts/                  # utilidades (dados, limpeza, pipeline)
+src/mfg_finance/          # implementação do solver
+tests/                    # suíte PyTest
 ```
 
 ## Roadmap
-- RuÃ­do comum / SPDE
-- Policy iteration / Newton
-- PreÃ§o endÃ³geno por *clearing* (opcional no CLI)
-- ExtensÃ£o 2D e casos nÃ£o-quadrÃ¡ticos
+- Acomodar modelos com ruído comum (SPDE).
+- Implementar policy iteration / Newton para aceleração.
+- Preço endógeno via mecanismo de clearing alternativo.
+- Extensões 2D e problemas não quadráticos.
