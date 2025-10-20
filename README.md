@@ -110,6 +110,3 @@ tests/...
 - Policy iteration / Newton
 - Preço endógeno por *clearing* (opcional no CLI)
 - Extensão 2D e casos não-quadráticos
-
-## Licença
-MIT (sugestão).
