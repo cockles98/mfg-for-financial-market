@@ -71,6 +71,33 @@ $$
 
 ![Preço endógeno](notebooks_output/run-20251020-005200/price_small.png)
 
+### Métricas salvas
+`metrics.json` inclui:
+- `final_error`, `final_error_relative`, `iterations`
+- `mix_history`, `relative_errors`
+- `mean_abs_alpha`, `std_alpha`, `liquidity_proxy`
+- `price_mean`, `price_std`, `price_min`, `price_max`, `price_span` (quando o clearing roda)
+
+## Ajustes finos
+- `mix`, `mix_min`, `mix_decay`, `stagnation_tol`: controlam o amortecimento do Picard.
+- `relative_tol`: critério relativo adicional (além do `tol` absoluto) para encerrar o laço.
+- `hjb_inner` / `hjb_tol`: esforço interno do solver HJB.
+- `solver.supply` e `solver.price_sensitivity`: curva empírica de oferta e sensibilidade de clearing (ver seção “Dados”). O baseline usa `price_sensitivity = 30.0`, obtendo preço médio ≈ 0.
+
+## Dados e reprodução
+1. **Ingestão COTAHIST** (não versionada): copie os arquivos originais para `data/raw/` e use os scripts em `scripts/` para gerar os Parquets de `data/processed/` (detalhes em `docs/DATA.md`).
+2. **Curva de oferta** (quantis de volume/spread):
+   ```bash
+   python scripts/build_supply_curve.py      --input data/processed/cotahist_equities_extended.parquet      --output data/processed/supply_curve.csv
+   ```
+3. **Atualize o baseline** com a curva e a sensibilidade desejada:
+   ```bash
+   python scripts/update_solver_config.py      --supply data/processed/supply_curve.csv      --config configs/baseline.yaml      --scale 5e-05      --price-sensitivity 30.0
+   ```
+4. (Opcional) rode `python scripts/run_notebook_pipeline.py` para gerar `notebooks_output/run-YYYYmmdd-HHMMSS/`.
+
+> **Aviso legal:** dados COTAHIST pertencem à B3. Certifique-se de possuir licença antes de utilizá-los.
+
 ## Instalação
 ```bash
 git clone https://github.com/<org>/mfg-for-financial-market.git
@@ -92,32 +119,6 @@ python -m mfg_finance.cli sweep   --config configs/baseline.yaml   --phi 0.02,0.
 ```
 Artefatos vão para `artifacts/run-YYYYmmdd-HHMMSS/` ou `artifacts/sweep-.../` com arrays (`*.npy`), métricas (`metrics.json`), curvas de preço (`price.csv`) e figuras (`*.png`).
 
-## Ajustes finos
-- `mix`, `mix_min`, `mix_decay`, `stagnation_tol`: controlam o amortecimento do Picard.
-- `relative_tol`: critério relativo adicional (além do `tol` absoluto) para encerrar o laço.
-- `hjb_inner` / `hjb_tol`: esforço interno do solver HJB.
-- `solver.supply` e `solver.price_sensitivity`: curva empírica de oferta e sensibilidade de clearing (ver seção “Dados”). O baseline usa `price_sensitivity = 30.0`, obtendo preço médio ≈ 0.
-
-### Métricas salvas
-`metrics.json` inclui:
-- `final_error`, `final_error_relative`, `iterations`
-- `mix_history`, `relative_errors`
-- `mean_abs_alpha`, `std_alpha`, `liquidity_proxy`
-- `price_mean`, `price_std`, `price_min`, `price_max`, `price_span` (quando o clearing roda)
-
-## Dados e reprodução
-1. **Ingestão COTAHIST** (não versionada): copie os arquivos originais para `data/raw/` e use os scripts em `scripts/` para gerar os Parquets de `data/processed/` (detalhes em `docs/DATA.md`).
-2. **Curva de oferta** (quantis de volume/spread):
-   ```bash
-   python scripts/build_supply_curve.py      --input data/processed/cotahist_equities_extended.parquet      --output data/processed/supply_curve.csv
-   ```
-3. **Atualize o baseline** com a curva e a sensibilidade desejada:
-   ```bash
-   python scripts/update_solver_config.py      --supply data/processed/supply_curve.csv      --config configs/baseline.yaml      --scale 5e-05      --price-sensitivity 30.0
-   ```
-4. (Opcional) rode `python scripts/run_notebook_pipeline.py` para gerar `notebooks_output/run-YYYYmmdd-HHMMSS/`.
-
-> **Aviso legal:** dados COTAHIST pertencem à B3. Certifique-se de possuir licença antes de utilizá-los.
 
 ## Testes
 ```bash
@@ -144,6 +145,7 @@ tests/                    # suíte PyTest
 - Implementar policy iteration / Newton para aceleração.
 - Preço endógeno via mecanismos de clearing alternativos.
 - Extensões 2D e problemas não quadráticos.
+
 
 
 
