@@ -1,5 +1,5 @@
 # Mean Field Games para o mercado brasileiro
-Solver numérico de **Mean Field Games (MFG)** em 1D aplicado à microestrutura da B3. O sistema acopla **Hamilton–Jacobi–Bellman (HJB)** e **Fokker–Planck (FP)** resolvidos por iteração de Picard com esquemas conservativos (Lax-Friedrichs + upwind). O projeto oferece CLI, notebook, scripts de preparação de dados e testes automatizados.
+Solver numérico de **Mean Field Games (MFG)** em 1D aplicado às ações da B3 de 2015 a 2025. O sistema acopla **Hamilton–Jacobi–Bellman (HJB)** e **Fokker–Planck (FP)** resolvidos por iteração de Picard com esquemas conservativos (Lax-Friedrichs + upwind). O projeto oferece CLI, notebook, scripts de preparação de dados e testes automatizados.
 
 ## Visão geral
 O modelo conecta decisões individuais de agentes de alta frequência a efeitos agregados (campo médio). Cada agente decide esforços de negociação para minimizar custos de execução e inventário, enquanto a média das decisões retroalimenta o ambiente enfrentado por todos. O solver busca o equilíbrio alternando HJB (valor) e FP (densidade) com amortecimento adaptativo.
@@ -133,6 +133,7 @@ tests/                    # suíte PyTest
 - Implementar policy iteration / Newton para aceleração.
 - Preço endógeno via mecanismos de clearing alternativos.
 - Extensões 2D e problemas não quadráticos.
+
 
 
 
