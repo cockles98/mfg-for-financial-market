@@ -1,27 +1,50 @@
 grid:
-  x_min: -5.0
-  x_max: 5.0
-  nx: 201
+  x_min: -5.476577460861574
+  x_max: 5.476577460861574
+  nx: 241
   T: 0.5
-  nt: 150
+  nt: 200
   bc: neumann
 params:
   nu: 0.012239
   phi: 0.087811
   gamma_T: 2.778412
-  eta0: 0.0001
-  eta1: 0.071428
+  eta0: 0.0072254335260115
+  eta1: 0.000879067179546225
   m0_mean: 0.0
-  m0_std: 1.0
+  m0_std: 2.0
 solver:
-  max_iter: 200
+  max_iter: 800
   tol: 1.0e-06
   relative_tol: 0.0005
-  mix: 0.3
-  mix_min: 0.0001
+  mix: 0.15
+  mix_min: 1.0e-05
   mix_decay: 0.5
   stagnation_tol: 0.02
+  solver_retries: 4
+  max_iter_cap: 5000
+  final_error_guard: 0.0005
+  final_error_fallback: 0.02
+  calibration_rounds: 6
+  calibration_lr: 0.15
+  calibration_rel_guard: 15.0
+  calibration_rel_tol: 0.05
+  calibration_guard_warmup: 3
+  inventory_rel_weight: 2.5
+  flow_rel_weight: 2.0
   use_dynamic_eta: true
+  eta_bounds:
+  - 0.0001
+  - 0.1
+  anderson_depth: 3
+  anderson_beta: 1.0
+  drift_strength: 0.5
+  initial_density_mode: gaussian
+  initial_density_bucket: all
+  initial_density_quantiles:
+  - 0.33
+  - 0.66
+  alpha_cap: 5.0
   supply:
   - -3.6329758651818284e-07
   - -5.036329758651819e-05
@@ -174,9 +197,13 @@ solver:
   - 4.462570215426131e-05
   - 4.462570215426131e-05
   - -3.6329758651818284e-07
-  price_sensitivity: 30.0
+  price_sensitivity: 3.0
+  price_noise_std: 0.0
+  price_noise_std_cap: 0.0
+  price_noise_seed: 42
   price_bracket:
   - -1.0
   - 1.0
   compute_price: true
-  supply_scale: 5.0e-05
+  supply_scale: 1.0e-05
+  initial_density_spread: 2.306695820811666

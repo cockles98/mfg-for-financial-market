@@ -15,6 +15,7 @@ from typing import Any, Dict, Iterable, List
 import numpy as np
 import yaml
 
+from .data_init import empirical_initial_density
 from .grid import Grid1D
 from .models.hft import HFTParams, eta_from_m_alpha, initial_density
 from .price import solve_price_clearing
@@ -115,6 +116,39 @@ def _build_params(params_cfg: Dict[str, Any]) -> HFTParams:
     )
 
 
+def _initial_density_from_cfg(
+    grid: Grid1D,
+    params: HFTParams,
+    solver_cfg: Dict[str, Any],
+) -> np.ndarray:
+    density_mode = str(solver_cfg.get("initial_density_mode", "gaussian")).lower()
+    spread_scale = float(solver_cfg.get("initial_density_spread", 1.0))
+    if density_mode == "empirical":
+        bucket = solver_cfg.get("initial_density_bucket", "all")
+        bucket_quantiles = solver_cfg.get("initial_density_quantiles", (0.33, 0.66))
+        if not isinstance(bucket_quantiles, (list, tuple)) or len(bucket_quantiles) != 2:
+            bucket_quantiles = (0.33, 0.66)
+        try:
+            return empirical_initial_density(
+                grid,
+                liquidity_bucket=bucket,
+                bucket_quantiles=tuple(bucket_quantiles),
+                spread_scale=spread_scale,
+            )
+        except Exception as exc:  # pragma: no cover - runtime diagnostic
+            print(f"[warning] Failed to load empirical density ({exc}); using Gaussian.")
+    adjusted = HFTParams(
+        nu=params.nu,
+        phi=params.phi,
+        gamma_T=params.gamma_T,
+        eta0=params.eta0,
+        eta1=params.eta1,
+        m0_mean=params.m0_mean,
+        m0_std=max(params.m0_std * spread_scale, 1e-3),
+    )
+    return initial_density(grid, adjusted)
+
+
 def _save_numpy_array(path: pathlib.Path, array: np.ndarray) -> None:
     np.save(path, array)
 
@@ -174,7 +208,7 @@ def _run_single_experiment(
     params = _build_params(cfg["params"])
     solver_cfg = cfg.get("solver", {})
 
-    m0 = initial_density(grid, params)
+    m0 = _initial_density_from_cfg(grid, params, solver_cfg)
     eta_callback = eta_from_m_alpha if solver_cfg.get("use_dynamic_eta", True) else None
     metrics_path = artifacts_dir / "metrics.json"
 
@@ -204,6 +238,9 @@ def _run_single_experiment(
         fp_kwargs={},
         eta_callback=eta_callback,
         metrics_path=metrics_path,
+        drift_strength=float(solver_cfg.get("drift_strength", 0.0)),
+        anderson_depth=int(solver_cfg.get("anderson_depth", 0)),
+        anderson_beta=float(solver_cfg.get("anderson_beta", 1.0)),
     )
 
     _ensure_dir(artifacts_dir)
@@ -253,6 +290,11 @@ def _run_single_experiment(
             grid.dx,
             bracket=bracket,
         )
+        noise_std = float(solver_cfg.get("price_noise_std", 0.0))
+        if noise_std > 0.0:
+            seed = solver_cfg.get("price_noise_seed")
+            rng = np.random.default_rng(int(seed)) if seed is not None else np.random.default_rng()
+            prices = prices + rng.normal(0.0, noise_std, size=prices.shape)
         price_mean = float(np.mean(prices))
         price_std = float(np.std(prices))
         price_min = float(np.min(prices))

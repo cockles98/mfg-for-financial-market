@@ -19,6 +19,7 @@ from .grid import Grid1D
 from .hamiltonian import alpha_star
 from .models.hft import HFTParams
 from .ops import divergence_upwind, laplacian_matrix, project_positive_and_renormalize
+from .gradients import lax_friedrichs_gradient
 
 __all__ = [
     "velocity_from_U",
@@ -33,6 +34,10 @@ def velocity_from_U(
     m_n: np.ndarray,
     grid: Grid1D,
     params: HFTParams,
+    *,
+    max_dissipation: float | None = None,
+    alpha_cap: float | None = None,
+    drift_strength: float = 0.0,
 ) -> np.ndarray:
     """
     Compute the transport velocity derived from the HJB control.
@@ -58,12 +63,14 @@ def velocity_from_U(
         msg = "U_n and m_n must both match the spatial grid shape."
         raise ValueError(msg)
 
-    gradient = np.empty_like(U_n)
-    gradient[1:-1] = (U_n[2:] - U_n[:-2]) / (2.0 * grid.dx)
-    gradient[0] = (U_n[1] - U_n[0]) / grid.dx
-    gradient[-1] = (U_n[-1] - U_n[-2]) / grid.dx
+    gradient = lax_friedrichs_gradient(U_n, grid.dx, max_dissipation=max_dissipation)
 
-    return alpha_star(gradient, m_n, params, mean_alpha=None)
+    alpha = alpha_star(gradient, m_n, params, mean_alpha=None)
+    if drift_strength != 0.0:
+        alpha = alpha - float(drift_strength) * grid.x
+    if alpha_cap is not None:
+        alpha = np.clip(alpha, -float(alpha_cap), float(alpha_cap))
+    return alpha
 
 
 def fp_step(
@@ -118,6 +125,9 @@ def solve_fp_forward(
     m0: np.ndarray,
     *,
     progress: bool = True,
+    max_dissipation: float | None = None,
+    alpha_cap: float | None = None,
+    drift_strength: float = 0.0,
 ) -> np.ndarray:
     """
     Solve the Fokker-Planck equation forward in time.
@@ -156,7 +166,15 @@ def solve_fp_forward(
     iterator = tqdm(iterator, desc="FP forward", leave=False, total=grid.nt) if progress else iterator
 
     for n in iterator:
-        v_n = velocity_from_U(U_all[n], density[n], grid, params)
+        v_n = velocity_from_U(
+            U_all[n],
+            density[n],
+            grid,
+            params,
+            max_dissipation=max_dissipation,
+            alpha_cap=alpha_cap,
+            drift_strength=drift_strength,
+        )
         density[n + 1] = fp_step(density[n], v_n, grid, params)
 
     return density
@@ -183,4 +201,5 @@ class FPSolver:
             self.params,
             initial_density,
             progress=self.show_progress,
+            drift_strength=0.0,
         )

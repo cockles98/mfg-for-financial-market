@@ -28,6 +28,7 @@ def compute_alpha_traj(
     grid: Grid1D,
     params: HFTParams,
     eta_callback: EtaCallback | None = None,
+    alpha_cap: float | None = None,
 ) -> np.ndarray:
     """
     Compute the optimal control trajectory from the value and density paths.
@@ -43,7 +44,10 @@ def compute_alpha_traj(
         grad[1:-1] = (U_n[2:] - U_n[:-2]) / (2.0 * grid.dx)
         grad[0] = (U_n[1] - U_n[0]) / grid.dx
         grad[-1] = (U_n[-1] - U_n[-2]) / grid.dx
-        alpha[n] = alpha_star(grad, m_n, params, mean_alpha=None, eta_callback=eta_callback)
+        alpha_n = alpha_star(grad, m_n, params, mean_alpha=None, eta_callback=eta_callback)
+        if alpha_cap is not None:
+            alpha_n = np.clip(alpha_n, -float(alpha_cap), float(alpha_cap))
+        alpha[n] = alpha_n
     return alpha
 def compute_alpha_metrics(alpha_all: np.ndarray) -> Dict[str, float]:
     """
@@ -68,9 +72,9 @@ def save_metrics(metrics: Dict[str, float], path: pathlib.Path | str) -> None:
         json.dump(metrics, handle, indent=2)
 def solve_mfg_picard(
     grid: Grid1D,
-   params: HFTParams,
-   *,
-   max_iter: int = 200,
+    params: HFTParams,
+    *,
+    max_iter: int = 200,
    tol: float = 1e-8,
    mix: float = 0.3,
     relative_tol: float | None = None,
@@ -83,6 +87,9 @@ def solve_mfg_picard(
     callback: ConvergenceCallback | None = None,
     eta_callback: EtaCallback | None = None,
     metrics_path: pathlib.Path | None = None,
+    anderson_depth: int = 0,
+    anderson_beta: float = 1.0,
+    drift_strength: float = 0.0,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, List[float], Dict[str, float]]:
     """
     Run the Picard fixed-point iteration for the coupled MFG system.
@@ -93,6 +100,12 @@ def solve_mfg_picard(
     hjb_kwargs.setdefault("value_cap", 50.0)
     hjb_kwargs.setdefault("value_relaxation", 0.5)
     fp_kwargs = dict(fp_kwargs or {})
+    fp_kwargs.setdefault(
+        "max_dissipation",
+        float(hjb_kwargs.get("max_dissipation", 1.0)),
+    )
+    fp_kwargs.setdefault("alpha_cap", hjb_kwargs.get("alpha_cap"))
+    fp_kwargs.setdefault("drift_strength", float(drift_strength))
     if m0 is None:
         from .models.hft import initial_density
         m0 = initial_density(grid, params)
@@ -105,6 +118,11 @@ def solve_mfg_picard(
     current_mix = float(mix)
     eps = 1e-12
     stalled_flag = False
+    anderson_depth = max(int(anderson_depth), 0)
+    anderson_beta = float(anderson_beta)
+    anderson_f: List[np.ndarray] = []
+    anderson_g: List[np.ndarray] = []
+    anderson_applied = 0
     for iteration in range(max_iter):
         U_all = solve_hjb_backward(
             M_k,
@@ -122,6 +140,37 @@ def solve_mfg_picard(
             progress=False,
             **fp_kwargs,
         )
+        if anderson_depth > 0:
+            F_vec = M_raw.ravel().copy()
+            G_vec = (M_raw - M_k).ravel().copy()
+            anderson_f.append(F_vec)
+            anderson_g.append(G_vec)
+            if len(anderson_f) > anderson_depth:
+                anderson_f.pop(0)
+                anderson_g.pop(0)
+            if len(anderson_f) > 1:
+                diffs = []
+                for i in range(1, len(anderson_g)):
+                    diffs.append(anderson_g[i] - anderson_g[i - 1])
+                G_mat = np.column_stack(diffs)
+                rhs = anderson_g[-1]
+                try:
+                    gamma = np.linalg.lstsq(G_mat, rhs, rcond=None)[0]
+                except (np.linalg.LinAlgError, ValueError):
+                    gamma = None
+                if gamma is not None:
+                    gamma = np.append(gamma, 1.0 - float(np.sum(gamma)))
+                    if np.isfinite(gamma).all():
+                        combo = np.zeros_like(F_vec)
+                        start = len(anderson_f) - len(gamma)
+                        for weight, vec in zip(gamma, anderson_f[start:]):
+                            combo += float(weight) * vec
+                        M_anderson = combo.reshape(M_k.shape)
+                        if np.isfinite(M_anderson).all():
+                            if anderson_beta != 1.0:
+                                M_anderson = anderson_beta * M_anderson + (1.0 - anderson_beta) * M_raw
+                            M_raw = M_anderson
+                            anderson_applied += 1
         prev_error = errors[-1] if errors else None
         candidate_mix = current_mix
         stalled = False
@@ -160,8 +209,11 @@ def solve_mfg_picard(
         relative_check = relative_tol is not None and error_rel < relative_tol
         if absolute_check or relative_check:
             break
-    alpha_all = compute_alpha_traj(U_all, M_k, grid, params, eta_callback=eta_callback)
+    alpha_cap = hjb_kwargs.get("alpha_cap")
+    alpha_all = compute_alpha_traj(U_all, M_k, grid, params, eta_callback=eta_callback, alpha_cap=alpha_cap)
     metrics = compute_alpha_metrics(alpha_all)
+    max_alpha = float(np.max(np.abs(alpha_all))) if alpha_all.size else 0.0
+    cfl_limits = grid.suggest_cfl_limits(params.nu, max_alpha if max_alpha > 0.0 else None)
     final_error = errors[-1] if errors else 0.0
     final_error_rel = relative_errors[-1] if relative_errors else 0.0
     metrics.update(
@@ -174,6 +226,10 @@ def solve_mfg_picard(
         mix_history=mix_history,
         relative_errors=relative_errors,
         stalled=stalled_flag,
+        max_alpha=max_alpha,
+        cfl_limits=cfl_limits,
+        anderson_depth=anderson_depth,
+        anderson_applications=anderson_applied,
     )
     if metrics_path is not None:
         save_metrics(metrics, metrics_path)

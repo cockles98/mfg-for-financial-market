@@ -25,7 +25,8 @@ from .hamiltonian import (
     EtaCallback,
 )
 from .models.hft import HFTParams
-from .ops import backward_difference, forward_difference, laplacian_matrix
+from .ops import laplacian_matrix
+from .gradients import lax_friedrichs_gradient
 
 __all__ = [
     "HJBSolver",
@@ -53,29 +54,6 @@ def terminal_condition_U(grid: Grid1D, params: HFTParams) -> np.ndarray:
     """
 
     return params.gamma_T * (grid.x**2)
-
-
-def _lax_friedrichs_gradient(
-    values: np.ndarray,
-    dx: float,
-    *,
-    max_dissipation: float | None = None,
-) -> np.ndarray:
-    """
-    Compute a monotone gradient approximation using a Lax-Friedrichs stencil.
-    """
-
-    forward = forward_difference(values, dx)
-    backward = backward_difference(values, dx)
-    a = float(np.max(np.abs(np.concatenate((forward, backward)))))
-    if not np.isfinite(a) or a < 1e-8:
-        a = 1e-3
-    if max_dissipation is not None:
-        a = min(a, float(max_dissipation))
-    grad = 0.5 * (forward + backward) - 0.5 * a * (forward - backward)
-    grad[0] = forward[0]
-    grad[-1] = backward[-1]
-    return grad
 
 
 def hjb_step(
@@ -131,7 +109,7 @@ def hjb_step(
     mean_alpha = 0.0
 
     for _ in range(max_inner):
-        gradient = _lax_friedrichs_gradient(U_iter, grid.dx, max_dissipation=max_dissipation)
+        gradient = lax_friedrichs_gradient(U_iter, grid.dx, max_dissipation=max_dissipation)
         alpha = alpha_star(
             gradient,
             m_at_n,
