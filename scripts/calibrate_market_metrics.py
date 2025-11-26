@@ -174,9 +174,11 @@ def _build_params(cfg: dict[str, Any]) -> HFTParams:
     return HFTParams(
         nu=float(cfg["nu"]),
         phi=float(cfg["phi"]),
+        phi_4=float(cfg.get("phi_4", 0.0)),
         gamma_T=float(cfg["gamma_T"]),
         eta0=float(cfg.get("eta0", 1e-4)),
         eta1=float(cfg.get("eta1", 0.1)),
+        kappa=float(cfg.get("kappa", 0.0)),
         m0_mean=float(cfg.get("m0_mean", 0.0)),
         m0_std=float(cfg.get("m0_std", 1.0)),
     )
@@ -236,6 +238,7 @@ def _maybe_compute_price(
 
     supply_schedule = _build_supply_schedule(solver_cfg, grid)
     sensitivity = float(solver_cfg.get("price_sensitivity", 1.0))
+    kappa = float(solver_cfg.get("price_elasticity", solver_cfg.get("kappa", 0.0)))
     bracket_cfg = solver_cfg.get("price_bracket", (-10.0, 10.0))
     if (
         not isinstance(bracket_cfg, (list, tuple))
@@ -253,6 +256,7 @@ def _maybe_compute_price(
         densities,
         supply_schedule,
         grid.dx,
+        kappa=kappa,
         bracket=bracket,
     )
     noise_std = float(solver_cfg.get("price_noise_std", 0.0))

@@ -8,12 +8,15 @@ grid:
 params:
   nu: 0.012239
   phi: 0.087811
+  phi_4: 10.0
   gamma_T: 2.778412
   eta0: 0.0072254335260115
   eta1: 0.000879067179546225
+  kappa: 20.0
   m0_mean: 0.0
-  m0_std: 2.0
+  m0_std: 1.0
 solver:
+  price_elasticity: 20.0
   max_iter: 800
   tol: 1.0e-06
   relative_tol: 0.0005
@@ -206,4 +209,4 @@ solver:
   - 1.0
   compute_price: true
   supply_scale: 1.0e-05
-  initial_density_spread: 2.306695820811666
+  initial_density_spread: 1.0
