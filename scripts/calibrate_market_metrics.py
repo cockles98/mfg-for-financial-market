@@ -263,7 +263,13 @@ def _maybe_compute_price(
     if noise_std > 0.0:
         seed = solver_cfg.get("price_noise_seed")
         rng = np.random.default_rng(int(seed)) if seed is not None else np.random.default_rng()
-        prices = prices + rng.normal(0.0, noise_std, size=prices.shape)
+        # MUDANÇA: Usar soma cumulativa (Brownian Motion) para criar um Random Walk suave
+        # Isso preserva a estrutura de baixa volatilidade enquanto quebra a correlação com o fluxo
+        white_noise = rng.normal(0.0, noise_std, size=prices.shape)
+        brownian_noise = np.cumsum(white_noise)
+        # Centralizar para evitar drift excessivo inicial
+        brownian_noise = brownian_noise - brownian_noise[0]
+        prices = prices + brownian_noise
     stats = {
         "price_mean": float(np.mean(prices)),
         "price_std": float(np.std(prices)),

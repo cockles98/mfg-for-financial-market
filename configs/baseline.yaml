@@ -16,7 +16,6 @@ params:
   m0_mean: 0.0
   m0_std: 1.0
 solver:
-  price_elasticity: 20.0
   max_iter: 800
   tol: 1.0e-06
   relative_tol: 0.0005
@@ -200,8 +199,9 @@ solver:
   - 4.462570215426131e-05
   - 4.462570215426131e-05
   - -3.6329758651818284e-07
+  price_elasticity: 100.0
   price_sensitivity: 3.0
-  price_noise_std: 0.0
+  price_noise_std: 0.0015
   price_noise_std_cap: 0.0
   price_noise_seed: 42
   price_bracket:
