@@ -199,14 +199,15 @@ solver:
   - 4.462570215426131e-05
   - 4.462570215426131e-05
   - -3.6329758651818284e-07
-  price_elasticity: 100.0
+  price_elasticity: 500.0
   price_sensitivity: 3.0
-  price_noise_std: 0.0015
+  price_noise_std: 0.002
   price_noise_std_cap: 0.0
   price_noise_seed: 42
   price_bracket:
   - -1.0
   - 1.0
+  price_trend: 0.1
   compute_price: true
   supply_scale: 1.0e-05
   initial_density_spread: 1.0

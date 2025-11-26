@@ -269,6 +269,13 @@ def _maybe_compute_price(
         brownian_noise = np.cumsum(white_noise)
         # Centralizar para evitar drift excessivo inicial
         brownian_noise = brownian_noise - brownian_noise[0]
+        # NOVO: Adicionar tendência linear
+        trend_total = float(solver_cfg.get("price_trend", 0.0))
+        if trend_total != 0.0:
+            trend_profile = np.linspace(0.0, trend_total, prices.shape[0])
+            # Centralizar a tendencia para nao deslocar a media drasticamente
+            trend_profile = trend_profile - trend_profile[0]
+            brownian_noise = brownian_noise + trend_profile
         prices = prices + brownian_noise
     stats = {
         "price_mean": float(np.mean(prices)),

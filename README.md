@@ -71,7 +71,14 @@ $$
 - `mix`, `mix_min`, `mix_decay`, `stagnation_tol`: controlam o amortecimento do Picard.
 - `relative_tol`: criterio relativo adicional (alem do `tol` absoluto) para encerrar o laco.
 - `hjb_inner` / `hjb_tol`: esforco interno do solver HJB.
-- `solver.supply` e `solver.price_sensitivity`: curva empirica de oferta e sensibilidade de clearing (ver proxima secao). O baseline usa `price_sensitivity = 30.0`, obtendo preco medio ~0.
+- Inventario: `phi` (quadratico) e `phi_4` (quartico) penalizam extremos; `phi_4` alto (ex.: 10x `phi`) mantém desvio de inventario <~1.
+- Preco endogeno:
+  - `price_elasticity` (kappa): elasticidade dos noise traders; valores grandes desacoplam fluxo-retorno.
+  - `price_noise_std`: desvio do ruido browniano (random walk) adicionado apos o clearing.
+  - `price_trend`: drift linear somado ao ruido para ajustar a escala da volatilidade diaria.
+  - `price_sensitivity`: inclinacao da curva de demanda do market maker (continua ativa).
+  - `solver.supply`: curva de oferta empirica (ver proxima secao).
+  Baseline atual: `price_elasticity=10000.0`, `price_noise_std=0.002`, `price_trend=0.1`, `initial_density_spread=1.0`.
 
 ## Instalacao
 ```bash
