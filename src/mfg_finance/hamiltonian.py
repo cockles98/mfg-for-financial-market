@@ -133,7 +133,7 @@ def running_cost(
     if eta <= 0.0:
         msg = "Running cost requires a positive eta."
         raise ValueError(msg)
-    return 0.5 * eta * (alpha**2) + params.phi * (x**2)
+    return 0.5 * eta * (alpha**2) + params.phi * (x**2) + params.phi_4 * (x**4)
 
 
 def alpha_star(
@@ -230,7 +230,7 @@ def hamiltonian_value(
     if eta <= 0.0:
         msg = "Hamiltonian requires a positive eta."
         raise ValueError(msg)
-    return 0.5 * (momentum**2) / eta + params.phi * (x**2)
+    return 0.5 * (momentum**2) / eta + params.phi * (x**2) + params.phi_4 * (x**4)
 
 
 class ControlLaw(Protocol):

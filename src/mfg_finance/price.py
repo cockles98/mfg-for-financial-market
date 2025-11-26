@@ -19,6 +19,7 @@ def solve_price_clearing(
     densities: np.ndarray,
     supply: Sequence[float],
     dx: float,
+    kappa: float = 0.0,
     *,
     bracket: tuple[float, float] = (-10.0, 10.0),
     max_iter: int = 50,
@@ -37,6 +38,8 @@ def solve_price_clearing(
         Target supply schedule matching the temporal grid.
     dx :
         Spatial step used for numerical integration.
+    kappa :
+        Price elasticity of noise traders (absorb flow as ``-kappa * price``).
     bracket :
         Initial search interval for the price.
     max_iter :
@@ -64,7 +67,9 @@ def solve_price_clearing(
 
         def imbalance(price: float) -> float:
             control = alpha_field(n, price)
-            return float(np.sum(control * densities[n]) * dx - target)
+            flow_mm = float(np.sum(control * densities[n]) * dx)
+            flow_noise = -kappa * price
+            return flow_mm + flow_noise - target
 
         lower, upper = a, b
         f_lower, f_upper = imbalance(lower), imbalance(upper)

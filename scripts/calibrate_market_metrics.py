@@ -14,6 +14,7 @@ import argparse
 import copy
 import json
 import shutil
+import sys
 from dataclasses import asdict, dataclass, replace
 from datetime import datetime
 from pathlib import Path
@@ -22,6 +23,13 @@ from typing import Any, Dict, Iterable, Tuple
 import numpy as np
 import pandas as pd
 import yaml
+
+ROOT_DIR = Path(__file__).resolve().parents[1]
+SRC_PATH = ROOT_DIR / "src"
+if SRC_PATH.exists():
+    src_str = str(SRC_PATH)
+    if src_str not in sys.path:
+        sys.path.insert(0, src_str)
 
 from mfg_finance.data_init import empirical_initial_density
 from mfg_finance.eta import bounded_eta_callback

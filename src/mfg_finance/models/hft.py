@@ -41,9 +41,11 @@ class HFTParams:
 
     nu: float = 0.2
     phi: float = 0.1
+    phi_4: float = 0.0
     gamma_T: float = 1.0
     eta0: float = 0.05
     eta1: float = 0.5
+    kappa: float = 0.0
     m0_mean: float = 0.0
     m0_std: float = 1.0
 
@@ -53,6 +55,12 @@ class HFTParams:
             raise ValueError(msg)
         if self.nu < 0.0:
             msg = "nu must be non-negative."
+            raise ValueError(msg)
+        if self.phi_4 < 0.0:
+            msg = "phi_4 must be non-negative."
+            raise ValueError(msg)
+        if self.kappa < 0.0:
+            msg = "kappa must be non-negative."
             raise ValueError(msg)
 
 
