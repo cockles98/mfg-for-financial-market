@@ -61,17 +61,36 @@ Abaixo do capô, este projeto é um *solver* numérico de Alta Performance em Py
 ### O Modelo Matemático
 O sistema resolve um par de equações diferenciais parciais (EDPs) acopladas:
 
-**1. HJB (Hamilton–Jacobi–Bellman) - Backward**
-Define a estratégia ótima do agente, minimizando custos de transação e risco de inventário.
+**HJB (backward)**
+
 $$
--\partial_t U(t,x) - \nu \Delta U(t,x) + H(\nabla U(t,x), m(t,x)) = 0
+\begin{cases}
+& -\partial_t U(t,x) - \nu \Delta U(t,x) + H(\nabla U(t,x), m(t,x)) = 0 \\
+& U(T,x) = \gamma_T x^2
+\end{cases}
 $$
 
-**2. Fokker–Planck (FP) - Forward**
-Evolui a distribuição dos agentes no mercado (a "massa" de liquidez) sob a estratégia ótima.
+**FP (forward)**
+
 $$
-\partial_t m(t,x) - \nu \Delta m(t,x) - \nabla\cdot\big(m(t,x)v(t,x)\big) = 0
+\begin{cases}
+& \partial_t m(t,x) - \nu \Delta m(t,x) - \nabla\cdot\big(m(t,x)v(t,x)\big) = 0 \\
+& m(0,x) = m_0(x)
+\end{cases}
 $$
+
+**Controle ótimo LQ**
+
+$$
+\begin{cases}
+& \alpha^{*}(t,x) = -\frac{\partial_x U(t,x)}{\eta(m)} \\
+& \eta(m) = \eta_0 + \eta_1 \lvert \overline{\alpha} \rvert
+\end{cases}
+$$
+
+> **1D:** $\nabla U \equiv \partial_x U$ e $\nabla\cdot(mv)\equiv \partial_x(mv)$.
+
+> **1D:** $\nabla U \equiv \partial_x U$ e $\nabla\cdot(mv)\equiv \partial_x(mv)$.
 
 ### Arquitetura e Implementação
 * **Método Numérico:** Iteração de **Picard** com amortecimento adaptativo para encontrar o Ponto Fixo (Equilíbrio).
