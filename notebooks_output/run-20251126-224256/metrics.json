@@ -1,0 +1,124 @@
+{
+  "mean_abs_alpha": 0.16597447811413985,
+  "std_alpha": 0.8710085117882859,
+  "liquidity_proxy": 0.9607609231621295,
+  "final_error": 0.004391475165845602,
+  "final_error_relative": 0.00012359051554818544,
+  "iterations": 10,
+  "mix_initial": 0.009375,
+  "mix_final": 7.32421875e-05,
+  "mix_min": 1e-05,
+  "mix_history": [
+    0.009375,
+    0.009375,
+    0.009375,
+    0.0046875,
+    0.0046875,
+    0.00234375,
+    0.0005859375,
+    0.0005859375,
+    7.32421875e-05,
+    7.32421875e-05
+  ],
+  "relative_errors": [
+    0.025812453406207518,
+    0.021304842479410415,
+    0.017418177632246085,
+    0.010210425876137135,
+    0.008148307297831524,
+    0.005656964010250817,
+    0.0031766264431744764,
+    0.0013184997285858912,
+    0.0010199765310888174,
+    0.00012359051554818544
+  ],
+  "stalled": false,
+  "max_alpha": 5.0,
+  "cfl_limits": {
+    "dt": 0.0025,
+    "diffusion_dt": 0.08509029844491084,
+    "advection_dt": 0.009127629101435986
+  },
+  "anderson_depth": 3,
+  "anderson_applications": 9,
+  "solver_attempts": [
+    {
+      "attempt": 0,
+      "mix": 0.15,
+      "max_iter": 800,
+      "iterations": 16,
+      "final_error": 0.004862665932744269,
+      "max_alpha": 5.0,
+      "cfl_limits": {
+        "dt": 0.0025,
+        "diffusion_dt": 0.08509029844491084,
+        "advection_dt": 0.009127629101435986
+      },
+      "anderson_applications": 15
+    },
+    {
+      "attempt": 1,
+      "mix": 0.075,
+      "max_iter": 1200,
+      "iterations": 14,
+      "final_error": 0.005949584251151491,
+      "max_alpha": 5.0,
+      "cfl_limits": {
+        "dt": 0.0025,
+        "diffusion_dt": 0.08509029844491084,
+        "advection_dt": 0.009127629101435986
+      },
+      "anderson_applications": 13
+    },
+    {
+      "attempt": 2,
+      "mix": 0.0375,
+      "max_iter": 1800,
+      "iterations": 11,
+      "final_error": 0.029190691876162096,
+      "max_alpha": 5.0,
+      "cfl_limits": {
+        "dt": 0.0025,
+        "diffusion_dt": 0.08509029844491084,
+        "advection_dt": 0.009127629101435986
+      },
+      "anderson_applications": 11
+    },
+    {
+      "attempt": 3,
+      "mix": 0.01875,
+      "max_iter": 2700,
+      "iterations": 9,
+      "final_error": 0.008342298977704521,
+      "max_alpha": 5.0,
+      "cfl_limits": {
+        "dt": 0.0025,
+        "diffusion_dt": 0.08509029844491084,
+        "advection_dt": 0.009127629101435986
+      },
+      "anderson_applications": 8
+    },
+    {
+      "attempt": 4,
+      "mix": 0.009375,
+      "max_iter": 4050,
+      "iterations": 10,
+      "final_error": 0.004391475165845602,
+      "max_alpha": 5.0,
+      "cfl_limits": {
+        "dt": 0.0025,
+        "diffusion_dt": 0.08509029844491084,
+        "advection_dt": 0.009127629101435986
+      },
+      "anderson_applications": 9
+    }
+  ],
+  "solver_success": true,
+  "solver_final_error_guard": 0.0005,
+  "solver_final_error_fallback": 0.02,
+  "price_mean": 0.00039162446560037214,
+  "price_std": 0.01628150613973213,
+  "price_min": -0.08446019147407077,
+  "price_max": 0.1619575107917533,
+  "price_span": 0.24641770226582407
+}
