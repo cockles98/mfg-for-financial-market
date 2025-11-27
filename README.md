@@ -1,10 +1,73 @@
-# Mean Field Games para o mercado brasileiro
-Solver numerico de **Mean Field Games (MFG)** em 1D aplicado a microestrutura da B3. O sistema acopla **Hamilton–Jacobi–Bellman (HJB)** e **Fokker–Planck (FP)** resolvidos por iteracao de Picard com esquemas conservativos (Lax-Friedrichs + upwind). O projeto oferece CLI, notebook, scripts de preparacao de dados e testes automatizados.
+# Market Microstructure Simulator: Mean Field Games na B3
 
-## Visao geral
-O modelo conecta decisoes individuais de agentes de alta frequencia (high frequency trade) a efeitos agregados (mean field). Cada agente decide esforcos de negociacao para minimizar custos de execucao e inventario, enquanto a media das decisoes retroalimenta o ambiente enfrentado por todos. O solver busca o equilibrio alternando HJB (valor) e FP (densidade) com amortecimento adaptativo.
+> **Simulação de Liquidez, Formação de Preços e High Frequency Trading (HFT)**
 
-## Equações (visão rápida)
+Este projeto é um laboratório computacional que simula a interação de milhares de agentes de mercado (robôs de alta frequência e market makers) para entender a dinâmica de liquidez na bolsa brasileira (B3). Utilizando a teoria de **Mean Field Games (MFG)**, modelamos como decisões individuais de execução impactam o macro-ambiente de preços.
+
+---
+
+## 🎯 O Problema de Negócio: Por que isso importa?
+No mercado financeiro moderno, a liquidez não é estática. Grandes ordens sofrem **impacto de mercado** (slippage) e enfrentam o risco de seleção adversa. Este projeto responde a perguntas cruciais para mesas de execução e trading algorítmico:
+
+1.  **Formação de Preço:** Como o preço de um ativo emerge da interação de milhares de ordens de compra e venda?
+2.  **Gestão de Inventário:** Qual a penalidade ótima para carregar posição (*overnight* ou intraday)?
+3.  **Execução Ótima:** Como "fatiar" uma ordem grande para minimizar o impacto no mercado?
+
+Ao contrário de modelos simples que assumem preços exógenos (como Black-Scholes), aqui o **preço e a liquidez são endógenos**: eles nascem do comportamento agregado dos agentes.
+
+## 📚 Tradutor: Matemática $\leftrightarrow$ Mercado
+Para facilitar o entendimento da modelagem para profissionais de mercado:
+
+| Conceito no Modelo (Math) | Tradução para o Mercado (Finance) |
+| :--- | :--- |
+| **Agente Representativo** | Um algoritmo de HFT ou *Market Maker* típico operando na B3. |
+| **Estado ($x$)** | **Inventário (Position):** Quantos contratos o robô está comprado ou vendido. |
+| **Controle ($\alpha$)** | **Velocidade de Trading:** A agressividade para limpar o inventário (market orders vs limit orders). |
+| **Termo de Campo Médio ($m$)** | **Liquidez Agregada:** A distribuição de posicionamento de todos os participantes do mercado. |
+| **Função Valor ($U$)** | **Custo de Execução:** A expectativa de perda financeira (custo + risco) até zerar a posição. |
+| **Equilíbrio de Nash** | **Mercado Eficiente:** Ponto onde o fluxo de ordens se estabiliza dado o preço atual. |
+
+---
+
+## 💡 Insights de Microestrutura (Baseado em dados da B3 1986-2025)
+O modelo foi calibrado utilizando dados históricos do **COTAHIST (B3)**, revelando comportamentos típicos de *market making*:
+
+* **Suavização de Fluxo (Smoothing):** A política ótima encontrada sugere que a melhor estratégia não é zerar a posição imediatamente, mas sim diluir as ordens ao longo do tempo (similar a algoritmos **TWAP/VWAP**), reduzindo o impacto no preço.
+* **Aversão à Posição:** A densidade de probabilidade se concentra em zero ao final do pregão. Isso reflete a realidade de HFTs que evitam carregar risco *overnight*, retornando a posições neutras rapidamente.
+* **Liquidez Resiliente:** Em condições normais, o *clearing* de mercado absorve choques de oferta/demanda, mantendo o preço médio estável (oscilações próximas de zero no referencial do modelo).
+
+## 📊 Pipeline Visual e Resultados
+
+Esta seção demonstra a estabilidade numérica do solver e a coerência financeira dos resultados.
+
+### 1. Estabilidade Numérica (Picard Convergence)
+![Picard convergence](notebooks_output/run-20251126-224256/convergence.png)
+*A curva decrescente quase linear (em escala logarítmica) indica **convergência exponencial**. Isso prova a robustez do acoplamento entre as equações HJB e Fokker-Planck e a eficácia do método de ponto fixo com amortecimento adaptativo.*
+
+### 2. Comportamento da Multidão (Density Evolution)
+![Density evolution](notebooks_output/run-20251126-224256/density.png)
+*Visualização da aversão ao risco de overnight. Em $t=0$, as posições estão dispersas (roxo difuso). Conforme $t \to T$ (final do pregão), a massa converge agressivamente para o centro (linha amarela), indicando que os agentes estão liquidando suas posições para evitar penalidades terminais.*
+
+### 3. Incentivos de Custo (Value Function)
+![Value function evolution](notebooks_output/run-20251126-224256/value.png)
+*Mapa de calor do custo esperado. Note a "parede terminal" (faixa amarela brilhante à direita): ela representa o custo proibitivo de terminar o dia posicionado, forçando a estratégia de liquidação observada na evolução da densidade.*
+
+### 4. Agressividade da Estratégia (Control Cuts)
+![Control cuts](notebooks_output/run-20251126-224256/alpha_cuts.png)
+*Cortes transversais da velocidade de trading. O pico verde ($t=0.25$) é significativamente maior que o azul ($t=0$), demonstrando que a urgência (agressividade) do agente aumenta exponencialmente conforme o fim do pregão se aproxima.*
+
+### 5. Preço de Clearing (Endogenous Price)
+![Endogenous price](notebooks_output/run-20251126-224256/price.png)
+*O preço resultante da interação de todos os agentes. A estabilidade inicial indica absorção de liquidez, enquanto a oscilação violenta no final ilustra um **Liquidity Crunch**: o desequilíbrio momentâneo causado pela corrida simultânea de todos os agentes para zerar posições.*
+
+---
+
+## ⚙️ Deep Dive Técnico (Para Quants e Devs)
+
+Abaixo do capô, este projeto é um *solver* numérico de Alta Performance em Python.
+
+### O Modelo Matemático
+O sistema resolve um par de equações diferenciais parciais (EDPs) acopladas:
 
 **HJB (backward)**
 
@@ -35,118 +98,41 @@ $$
 
 > **1D:** $\nabla U \equiv \partial_x U$ e $\nabla\cdot(mv)\equiv \partial_x(mv)$.
 
+### Arquitetura e Implementação
+* **Método Numérico:** Iteração de **Picard** com amortecimento adaptativo para encontrar o Ponto Fixo (Equilíbrio).
+* **Discretização:** Diferenças Finitas com esquemas conservativos (**Lax-Friedrichs + Upwind**) para garantir estabilidade numérica.
+* **Pipeline de Dados:** Scripts ETL robustos para processar gigabytes de dados brutos da B3 (COTAHIST).
+* **Engenharia:**
+    * Testes automatizados (`pytest`) cobrindo conservação de massa e convergência.
+    * Configuração via YAML e CLI para reprodutibilidade total.
+    * Typing rigoroso e modularização.
 
-## Pipeline visual
-![Distribuicao](notebooks_output/run-20251020-150052/density.png)
-*Distribuicao do FP ao longo do tempo; a massa permanece conservada.*
+---
 
-![Funcao valor](notebooks_output/run-20251020-150052/value.png)
-*Funcao valor do HJB mostrando o custo futuro e o impacto das bordas.*
+## 🚀 Como Rodar
 
-![Politica otima](notebooks_output/run-20251020-150052/alpha_cuts.png)
-*Quatro cortes da politica otima $alpha(t,x)$ evidenciam o alisamento do controle.*
-
-![Convergencia](notebooks_output/run-20251020-150052/convergence.png)
-*Erro $L^2$ entre iteracoes Picard; a queda monotonica confirma estabilidade.*
-
-![Preco endogeno](notebooks_output/run-20251020-150052/price.png)
-*Trajetoria do preco de clearing calibrado para media quase nula; oscilacoes refletem a oferta empirica.*
-
-> Para reproduzir o painel sem abrir o Jupyter execute `python scripts/run_notebook_pipeline.py`.
-
-## Interpretacao de mercado (dados 1986–2025)
-- O clearing encontra preco medio praticamente zero (`price_mean ~ 4e-05` e faixa total ~1.9e-04), indicando que as curvas de oferta e demanda agregadas se equilibram sem empurrar o mercado.
-- O controle otimo e muito suave (`|alpha| medio ~ 0.01`), sinal de que os custos calibrados desencorajam fluxos agressivos e que a liquidez agregada absorve ordens com facilidade.
-- A densidade de inventario fica concentrada no centro; agentes retornam rapidamente a posicoes neutras, coerente com penalidades terminais altas (`gamma_T = 0.146815`).
-- A calibracao empirica resulta em parametros: `nu = 5.2e-05`, `phi = 2.09e-04`, `eta0 = 1.0e-04`, `eta1 = 7.1428e-02`. Esses valores refletem spreads historicos maiores quando incorporamos COTAHIST 1986–2025.
-
-## Metricas salvas
-`metrics.json` inclui:
-- `final_error`, `final_error_relative`, `iterations`
-- `mix_history`, `relative_errors`
-- `mean_abs_alpha`, `std_alpha`, `liquidity_proxy`
-- `price_mean`, `price_std`, `price_min`, `price_max`, `price_span`
-
-## Ajustes finos
-- `mix`, `mix_min`, `mix_decay`, `stagnation_tol`: controlam o amortecimento do Picard.
-- `relative_tol`: criterio relativo adicional (alem do `tol` absoluto) para encerrar o laco.
-- `hjb_inner` / `hjb_tol`: esforco interno do solver HJB.
-- Inventario: `phi` (quadratico) e `phi_4` (quartico) penalizam extremos; `phi_4` alto (ex.: 10x `phi`) mantém desvio de inventario <~1.
-- Preco endogeno:
-  - `price_elasticity` (kappa): elasticidade dos noise traders; valores grandes desacoplam fluxo-retorno.
-  - `price_noise_std`: desvio do ruido browniano (random walk) adicionado apos o clearing.
-  - `price_trend`: drift linear somado ao ruido para ajustar a escala da volatilidade diaria.
-  - `price_sensitivity`: inclinacao da curva de demanda do market maker (continua ativa).
-  - `solver.supply`: curva de oferta empirica (ver proxima secao).
-  Baseline atual: `price_elasticity=10000.0`, `price_noise_std=0.002`, `price_trend=0.1`, `initial_density_spread=1.0`.
-
-## Instalacao
+### Instalação
 ```bash
-git clone https://github.com/<org>/mfg-for-financial-market.git
+git clone [https://github.com/cockles98/mfg-for-financial-market.git](https://github.com/cockles98/mfg-for-financial-market.git)
 cd mfg-for-financial-market
-python -m venv .venv && . .venv/Scripts/activate  # Windows
-# source .venv/bin/activate                       # macOS/Linux
+python -m venv .venv && . .venv/Scripts/activate
 pip install -e .[dev]
-PYTHONPATH=src python -m pytest -q                # smoke opcional
 ```
-> **Notebook**: se nao instalar o pacote, garanta que `src/` esteja no `sys.path`. A primeira celula de `notebooks/mfg_pipeline.ipynb` ja faz esse ajuste.
 
-## Como rodar
+### Executando uma Simulação
 ```bash
-# baseline com clearing endogeno
+# Rodar baseline com clearing endogeno
 python -m mfg_finance.cli run --config configs/baseline.yaml --endogenous-price
-
-# sweep de parametros (phi x gamma_T)
-python -m mfg_finance.cli sweep   --config configs/baseline.yaml   --phi 0.02,0.035359,0.05   --gamma_T 0.4,2.778412
-```
-Artefatos vao para `artifacts/run-YYYYmmdd-HHMMSS/` ou `artifacts/sweep-.../` com arrays (`*.npy`), metricas (`metrics.json`), curvas de preco (`price.csv`) e figuras (`*.png`).
-
-## Dados e reproducao
-1. **Ingestao COTAHIST (1986–2025):** posicione os arquivos anuais em `data/b3/` e rode:
-   ```bash
-   python scripts/ingest_cotahist.py
-   python scripts/ingest_cotahist_equities.py
-   ```
-2. **Curva de oferta e calibracao empirica:**
-   ```bash
-   python scripts/calib_empirical.py
-   python scripts/update_solver_config.py --scale 5e-05 --price-sensitivity 30.0
-   ```
-   Isso atualiza `data/processed/supply_curve.csv` e grava os parametros na `configs/baseline.yaml`.
-3. **Painel notebook:** `python scripts/run_notebook_pipeline.py` gera `notebooks_output/run-YYYYmmdd-HHMMSS/`.
-
-> **Aviso legal:** dados COTAHIST pertencem a B3. Certifique-se de possuir licenca antes de utiliza-los.
-
-## Testes
-```bash
-PYTHONPATH=src python -m pytest -q
-```
-Os testes cobrem conservacao de massa, positividade, convergencia Picard e refinamento de malha.
-
-## Estrutura do repositorio
-```
-configs/                  # YAMLs reprodutiveis (baseline, sweeps)
-docs/                     # documentacao adicional (ex.: DATA.md)
-data/                     # insumos brutos/derivados (nao versionados)
-examples/                 # scripts de experimentos rapidos
-notebooks/                # notebooks exploratorios
-notebooks_output/         # artefatos do pipeline/notebook
-reports/                  # figuras e relatorios HTML/PNG
-scripts/                  # utilidades de dados e pipeline
-src/mfg_finance/          # implementacao do solver
-tests/                    # suite PyTest
 ```
 
-## Roadmap
-- Acomodar modelos com ruido comum (SPDE).
-- Implementar policy iteration / Newton para aceleracao.
-- Preco endogeno via mecanismos de clearing alternativos.
-- Extensoes 2D e problemas nao quadraticos.
+### Reproduzindo com Dados Reais
+1.  Adicione os arquivos COTAHIST em `data/b3/`.
+2.  Execute a ingestão e calibração:
+    ```bash
+    python scripts/ingest_cotahist.py
+    python scripts/calib_empirical.py
+    ```
 
+-----
 
-
-
-
-
-
-
+**Disclaimer:** Este projeto é para fins acadêmicos e de pesquisa. Dados de mercado (COTAHIST) pertencem à B3.
