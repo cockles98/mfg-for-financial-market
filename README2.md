@@ -90,8 +90,6 @@ $$
 
 > **1D:** $\nabla U \equiv \partial_x U$ e $\nabla\cdot(mv)\equiv \partial_x(mv)$.
 
-> **1D:** $\nabla U \equiv \partial_x U$ e $\nabla\cdot(mv)\equiv \partial_x(mv)$.
-
 ### Arquitetura e Implementação
 * **Método Numérico:** Iteração de **Picard** com amortecimento adaptativo para encontrar o Ponto Fixo (Equilíbrio).
 * **Discretização:** Diferenças Finitas com esquemas conservativos (**Lax-Friedrichs + Upwind**) para garantir estabilidade numérica.
