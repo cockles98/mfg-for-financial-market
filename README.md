@@ -134,17 +134,10 @@ pip install -e .[dev]
 python -m mfg_finance.cli run --config configs/baseline.yaml --endogenous-price
 ```
 
-### Reproduzindo com Dados Reais
-1.  Adicione os arquivos COTAHIST em `data/b3/`.
-2.  Execute a ingestão e calibração:
-    ```bash
-    python scripts/ingest_cotahist.py
-    python scripts/calib_empirical.py
-    ```
-
 -----
 
 **Disclaimer:** Este projeto é para fins acadêmicos e de pesquisa. Dados de mercado (COTAHIST) pertencem à B3.
+
 
 
 
