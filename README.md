@@ -50,23 +50,23 @@ O modelo foi calibrado utilizando dados históricos do **COTAHIST (B3)**, revela
 Esta seção demonstra a estabilidade numérica do solver e a coerência financeira dos resultados.
 
 ### 1. Estabilidade Numérica (Picard Convergence)
-![Picard convergence](notebooks_output/run-20251126-224256/convergence.png)
+![Picard convergence](reports/readme_images/convergence.png)
 *A curva decrescente quase linear (em escala logarítmica) indica **convergência exponencial**. Isso prova a robustez do acoplamento entre as equações HJB e Fokker-Planck e a eficácia do método de ponto fixo com amortecimento adaptativo.*
 
 ### 2. Comportamento da Multidão (Density Evolution)
-![Density evolution](notebooks_output/run-20251126-224256/density.png)
+![Density evolution](reports/readme_images/density.png)
 *Visualização da aversão ao risco de overnight. Em $t=0$, as posições estão dispersas (roxo difuso). Conforme $t \to T$ (final do pregão), a massa converge agressivamente para o centro (linha amarela), indicando que os agentes estão liquidando suas posições para evitar penalidades terminais.*
 
 ### 3. Incentivos de Custo (Value Function)
-![Value function evolution](notebooks_output/run-20251126-224256/value.png)
+![Value function evolution](reports/readme_images/value.png)
 *Mapa de calor do custo esperado. Note a "parede terminal" (faixa amarela brilhante à direita): ela representa o custo proibitivo de terminar o dia posicionado, forçando a estratégia de liquidação observada na evolução da densidade.*
 
 ### 4. Agressividade da Estratégia (Control Cuts)
-![Control cuts](notebooks_output/run-20251126-224256/alpha_cuts.png)
+![Control cuts](reports/readme_images/alpha_cuts.png)
 *Cortes transversais da velocidade de trading. O pico verde ($t=0.25$) é significativamente maior que o azul ($t=0$), demonstrando que a urgência (agressividade) do agente aumenta exponencialmente conforme o fim do pregão se aproxima.*
 
 ### 5. Preço de Clearing (Endogenous Price)
-![Endogenous price](notebooks_output/run-20251126-224256/price.png)
+![Endogenous price](reports/readme_images/price.png)
 *O preço resultante da interação de todos os agentes. A estabilidade inicial indica absorção de liquidez, enquanto a oscilação violenta no final ilustra um **Liquidity Crunch**: o desequilíbrio momentâneo causado pela corrida simultânea de todos os agentes para zerar posições.*
 
 ---
@@ -145,5 +145,6 @@ python -m mfg_finance.cli run --config configs/baseline.yaml --endogenous-price
 -----
 
 **Disclaimer:** Este projeto é para fins acadêmicos e de pesquisa. Dados de mercado (COTAHIST) pertencem à B3.
+
 
 
