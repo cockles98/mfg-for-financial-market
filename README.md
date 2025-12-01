@@ -134,11 +134,12 @@ pip install -e .[dev]
 python -m mfg_finance.cli run --config configs/baseline.yaml --endogenous-price
 ```
 
-> **O pipeline completo também está presente em `notebooks/mfg_pipeline.ipynb`, basta rodar as células em sequências para visualizar todos os resultados.**
+> **O pipeline completo também está presente em `notebooks/mfg_pipeline.ipynb`, basta rodar as células em sequência para visualizar todos os resultados.**
 
 -----
 
 **Disclaimer:** Este projeto é para fins acadêmicos e de pesquisa. Dados de mercado (COTAHIST) pertencem à B3.
+
 
 
 
