@@ -122,7 +122,7 @@ $$
 
 ### Instalação
 ```bash
-git clone [https://github.com/cockles98/mfg-for-financial-market.git](https://github.com/cockles98/mfg-for-financial-market.git)
+git clone https://github.com/cockles98/mfg-for-financial-market.git
 cd mfg-for-financial-market
 python -m venv .venv && . .venv/Scripts/activate
 pip install -e .[dev]
@@ -139,6 +139,7 @@ python -m mfg_finance.cli run --config configs/baseline.yaml --endogenous-price
 -----
 
 **Disclaimer:** Este projeto é para fins acadêmicos e de pesquisa. Dados de mercado (COTAHIST) pertencem à B3.
+
 
 
 
