@@ -1,5 +1,14 @@
 # Market Microstructure Simulator: Mean Field Games na B3
 
+<div align="center">
+
+![Python](https://img.shields.io/badge/python-3.10%2B-blue?style=for-the-badge&logo=python&logoColor=white)
+![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)(LICENSE)
+![Math](https://img.shields.io/badge/Model-Mean_Field_Games-orange?style=for-the-badge)
+![Asset](https://img.shields.io/badge/Asset-B3_Futures-yellow?style=for-the-badge)
+
+</div>
+
 > **Simulação de Liquidez, Formação de Preços e High Frequency Trading (HFT)**
 
 Este projeto é um laboratório computacional que simula a interação de milhares de agentes de mercado (robôs de alta frequência e market makers) para entender a dinâmica de liquidez na bolsa brasileira (B3). Utilizando a teoria de **Mean Field Games (MFG)**, modelamos como decisões individuais de execução impactam o macro-ambiente de preços.
@@ -136,3 +145,4 @@ python -m mfg_finance.cli run --config configs/baseline.yaml --endogenous-price
 -----
 
 **Disclaimer:** Este projeto é para fins acadêmicos e de pesquisa. Dados de mercado (COTAHIST) pertencem à B3.
+
