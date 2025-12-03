@@ -55,7 +55,7 @@ Esta seção demonstra a estabilidade numérica do solver e a coerência finance
 
 ### 2. Comportamento da Multidão (Density Evolution)
 ![Density evolution](reports/readme_images/density.png)
-*Visualização da aversão ao risco de overnight. Em $t=0$, as posições estão dispersas (roxo difuso). Conforme $t \to T$ (final do pregão), a massa converge agressivamente para o centro (linha amarela), indicando que os agentes estão liquidando suas posições para evitar penalidades terminais.*
+*Visualização da aversão ao risco de overnight. Em $`t = 0`$, as posições estão dispersas (roxo difuso). Conforme $t \to T$ (final do pregão), a massa converge agressivamente para o centro (linha amarela), indicando que os agentes estão liquidando suas posições para evitar penalidades terminais.*
 
 ### 3. Incentivos de Custo (Value Function)
 ![Value function evolution](reports/readme_images/value.png)
@@ -139,6 +139,7 @@ python -m mfg_finance.cli run --config configs/baseline.yaml --endogenous-price
 -----
 
 **Disclaimer:** Este projeto é para fins acadêmicos e de pesquisa. Dados de mercado (COTAHIST) pertencem à B3.
+
 
 
 
