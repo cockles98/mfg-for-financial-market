@@ -30,10 +30,10 @@ Para facilitar o entendimento da modelagem para profissionais de mercado:
 | Conceito no Modelo (Math) | Tradução para o Mercado (Finance) |
 | :--- | :--- |
 | **Agente Representativo** | Um algoritmo de HFT ou *Market Maker* típico operando na B3. |
-| **Estado ($x$)** | **Inventário (Position):** Quantos contratos o robô está comprado ou vendido. |
-| **Controle ($\alpha$)** | **Velocidade de Trading:** A agressividade para limpar o inventário (market orders vs limit orders). |
-| **Termo de Campo Médio ($m$)** | **Liquidez Agregada:** A distribuição de posicionamento de todos os participantes do mercado. |
-| **Função Valor ($U$)** | **Custo de Execução:** A expectativa de perda financeira (custo + risco) até zerar a posição. |
+| **Estado ($`x`$)** | **Inventário (Position):** Quantos contratos o robô está comprado ou vendido. |
+| **Controle ($`\alpha`$)** | **Velocidade de Trading:** A agressividade para limpar o inventário (market orders vs limit orders). |
+| **Termo de Campo Médio ($`m`$)** | **Liquidez Agregada:** A distribuição de posicionamento de todos os participantes do mercado. |
+| **Função Valor ($`U`$)** | **Custo de Execução:** A expectativa de perda financeira (custo + risco) até zerar a posição. |
 | **Equilíbrio de Nash** | **Mercado Eficiente:** Ponto onde o fluxo de ordens se estabiliza dado o preço atual. |
 
 ---
@@ -63,7 +63,7 @@ Esta seção demonstra a estabilidade numérica do solver e a coerência finance
 
 ### 4. Agressividade da Estratégia (Control Cuts)
 ![Control cuts](reports/readme_images/alpha_cuts.png)
-*Cortes transversais da velocidade de trading. O pico verde ($t=0.25$) é significativamente maior que o azul ($t=0$), demonstrando que a urgência (agressividade) do agente aumenta exponencialmente conforme o fim do pregão se aproxima.*
+*Cortes transversais da velocidade de trading. O pico verde ($`t = 0.25`$) é significativamente maior que o azul ($`t = 0`$), demonstrando que a urgência (agressividade) do agente aumenta exponencialmente conforme o fim do pregão se aproxima.*
 
 ### 5. Preço de Clearing (Endogenous Price)
 ![Endogenous price](reports/readme_images/price.png)
@@ -139,6 +139,7 @@ python -m mfg_finance.cli run --config configs/baseline.yaml --endogenous-price
 -----
 
 **Disclaimer:** Este projeto é para fins acadêmicos e de pesquisa. Dados de mercado (COTAHIST) pertencem à B3.
+
 
 
 
