@@ -9,6 +9,7 @@ from typing import Iterable, Sequence
 import pathlib
 
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker
 import numpy as np
 
 from .grid import Grid1D
@@ -36,10 +37,58 @@ class PlotConfig:
         Tuple storing figure width and height.
     cmap :
         Matplotlib colormap name.
+    inventory_scale :
+        Optional multiplicative factor to convert the state grid into real units
+        (e.g. number of shares). When provided, axes will be shown in those units.
+    inventory_label :
+        Optional label for the state axis. Defaults to "inventory" when
+        `inventory_scale` is set, otherwise "state".
+    time_scale :
+        Optional multiplicative factor to convert the time grid into real units
+        (e.g. hours). Leave as None to keep the normalised time.
+    time_offset :
+        Optional offset added after scaling time (e.g. market open hour).
+    time_label :
+        Optional label for the time axis. Defaults to "time" or "time (scaled)"
+        when `time_scale` is set.
+    time_tick_suffix :
+        Optional suffix appended to tick labels (e.g. "h" for hours).
     """
 
     figsize: tuple[float, float] = (10.0, 4.0)
     cmap: str = "viridis"
+    inventory_scale: float | None = None
+    inventory_label: str | None = None
+    time_scale: float | None = None
+    time_offset: float | None = None
+    time_label: str | None = None
+    time_tick_suffix: str | None = None
+
+
+def _scaled_state(grid: Grid1D, cfg: PlotConfig) -> tuple[np.ndarray, str]:
+    scale = cfg.inventory_scale
+    if scale is None or scale <= 0.0:
+        return grid.x, cfg.inventory_label or "state"
+    return grid.x * scale, cfg.inventory_label or "inventory"
+
+
+def _scaled_time(time: np.ndarray, cfg: PlotConfig) -> tuple[np.ndarray, str]:
+    scale = cfg.time_scale
+    offset = cfg.time_offset or 0.0
+    if scale is None or scale <= 0.0:
+        return time, cfg.time_label or "time"
+    scaled = time * scale + offset
+    return scaled, cfg.time_label or "time (scaled)"
+
+
+def _format_time_axis(ax: plt.Axes, cfg: PlotConfig) -> None:
+    if cfg.time_tick_suffix:
+        suffix = cfg.time_tick_suffix
+
+        def _fmt(val: float, _pos: int) -> str:
+            return f"{val:g}{suffix}"
+
+        ax.xaxis.set_major_formatter(mticker.FuncFormatter(_fmt))
 
 
 def plot_value_function(time: Iterable[float], grid: Iterable[float], values: np.ndarray, cfg: PlotConfig | None = None) -> plt.Figure:
@@ -152,16 +201,19 @@ def plot_density_time(M_all: np.ndarray, grid: Grid1D, path: pathlib.Path | str,
     """
 
     cfg = cfg or PlotConfig(cmap="magma")
-    extent = (grid.t[0], grid.t[-1], grid.x[0], grid.x[-1])
+    scaled_t, x_label = _scaled_time(grid.t, cfg)
+    scaled_x, y_label = _scaled_state(grid, cfg)
+    extent = (scaled_t[0], scaled_t[-1], scaled_x[0], scaled_x[-1])
     fig = _heatmap(
         M_all.T,
         extent,
         "Density evolution",
-        "time",
-        "state",
+        x_label,
+        y_label,
         cfg.cmap,
         cfg.figsize,
     )
+    _format_time_axis(fig.axes[0], cfg)
     fig.savefig(_prepare_path(path), dpi=150, bbox_inches="tight")
     plt.close(fig)
 
@@ -172,16 +224,19 @@ def plot_value_time(U_all: np.ndarray, grid: Grid1D, path: pathlib.Path | str, c
     """
 
     cfg = cfg or PlotConfig()
-    extent = (grid.t[0], grid.t[-1], grid.x[0], grid.x[-1])
+    scaled_t, x_label = _scaled_time(grid.t, cfg)
+    scaled_x, y_label = _scaled_state(grid, cfg)
+    extent = (scaled_t[0], scaled_t[-1], scaled_x[0], scaled_x[-1])
     fig = _heatmap(
         U_all.T,
         extent,
         "Value function evolution",
-        "time",
-        "state",
+        x_label,
+        y_label,
         cfg.cmap,
         cfg.figsize,
     )
+    _format_time_axis(fig.axes[0], cfg)
     fig.savefig(_prepare_path(path), dpi=150, bbox_inches="tight")
     plt.close(fig)
 
@@ -200,16 +255,19 @@ def plot_alpha_cuts(
     cfg = cfg or PlotConfig(figsize=(10.0, 5.0))
     fig, ax = plt.subplots(figsize=cfg.figsize)
 
+    scaled_x, x_label = _scaled_state(grid, cfg)
+    scaled_t, _ = _scaled_time(grid.t, cfg)
+
     times = list(times)
     for target in times:
         idx = int(np.clip(np.searchsorted(grid.t, target), 0, len(grid.t) - 1))
         ax.plot(
-            grid.x,
+            scaled_x,
             alpha_all[idx],
-            label=f"t={grid.t[idx]:.3f}",
+            label=f"t={scaled_t[idx]:.3f}{cfg.time_tick_suffix or ''}",
         )
 
-    ax.set_xlabel("state")
+    ax.set_xlabel(x_label)
     ax.set_ylabel("alpha")
     ax.set_title("Control cuts")
     if times:
@@ -233,14 +291,23 @@ def plot_convergence(errors: Sequence[float], path: pathlib.Path | str, figsize:
     plt.close(fig)
 
 
-def plot_price(time: Sequence[float], price: Sequence[float], path: pathlib.Path | str, figsize: tuple[float, float] = (8.0, 4.0)) -> None:
+def plot_price(
+    time: Sequence[float],
+    price: Sequence[float],
+    path: pathlib.Path | str,
+    figsize: tuple[float, float] = (8.0, 4.0),
+    cfg: PlotConfig | None = None,
+) -> None:
     """
     Save the price trajectory.
     """
 
-    fig, ax = plt.subplots(figsize=figsize)
-    ax.plot(time, price, marker="o")
-    ax.set_xlabel("time")
+    cfg = cfg or PlotConfig(figsize=figsize)
+    scaled_t, x_label = _scaled_time(np.asarray(time), cfg)
+    fig, ax = plt.subplots(figsize=cfg.figsize)
+    ax.plot(scaled_t, price, marker="o")
+    ax.set_xlabel(x_label)
+    _format_time_axis(ax, cfg)
     ax.set_ylabel("price")
     ax.set_title("Endogenous price")
     fig.savefig(_prepare_path(path), dpi=150, bbox_inches="tight")
