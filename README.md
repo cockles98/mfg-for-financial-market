@@ -55,7 +55,7 @@ Esta seção demonstra a estabilidade numérica do solver e a coerência finance
 
 ### 2. Comportamento da Multidão (Density Evolution)
 ![Density evolution](reports/readme_images/density.png)
-*Visualização da aversão ao risco de overnight. Em $`t = 0`$, as posições estão dispersas (roxo difuso). Conforme $`t \to T`$ (final do pregão), a massa converge agressivamente para o centro (linha amarela), indicando que os agentes estão liquidando suas posições para evitar penalidades terminais.*
+*Visualização da aversão ao risco de overnight. Em $`t = 10h`$, as posições estão dispersas (roxo difuso). Conforme $`t \to 18h`$ (final do pregão), a massa converge agressivamente para o centro (linha amarela), indicando que os agentes estão liquidando suas posições para evitar penalidades terminais.*
 
 ### 3. Incentivos de Custo (Value Function)
 ![Value function evolution](reports/readme_images/value.png)
@@ -63,7 +63,7 @@ Esta seção demonstra a estabilidade numérica do solver e a coerência finance
 
 ### 4. Agressividade da Estratégia (Control Cuts)
 ![Control cuts](reports/readme_images/alpha_cuts.png)
-*Cortes transversais da velocidade de trading. O pico verde ($`t = 0.25`$) é significativamente maior que o azul ($`t = 0`$), demonstrando que a urgência (agressividade) do agente aumenta exponencialmente conforme o fim do pregão se aproxima.*
+*Cortes transversais da velocidade de trading. O pico verde ($`t = 14h`$) é significativamente maior que o azul ($`t = 10h`$), demonstrando que a urgência (agressividade) do agente aumenta exponencialmente conforme o fim do pregão se aproxima.*
 
 ### 5. Preço de Clearing (Endogenous Price)
 ![Endogenous price](reports/readme_images/price.png)
@@ -139,6 +139,7 @@ python -m mfg_finance.cli run --config configs/baseline.yaml --endogenous-price
 -----
 
 **Disclaimer:** Este projeto é para fins acadêmicos e de pesquisa. Dados de mercado (COTAHIST) pertencem à B3.
+
 
 
 
