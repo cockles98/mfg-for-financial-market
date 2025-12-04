@@ -284,7 +284,7 @@ def plot_convergence(errors: Sequence[float], path: pathlib.Path | str, figsize:
     fig, ax = plt.subplots(figsize=figsize)
     ax.plot(range(len(errors)), errors, marker="o", linestyle="-")
     ax.set_xlabel("iterations")
-    ax.set_ylabel("error (norma)")
+    ax.set_ylabel("error (norm)")
     ax.set_title("Error across iterations (Picard convergence)")
     ax.set_yscale("log")
     fig.savefig(_prepare_path(path), dpi=150, bbox_inches="tight")
