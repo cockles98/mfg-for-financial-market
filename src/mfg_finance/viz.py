@@ -207,7 +207,7 @@ def plot_density_time(M_all: np.ndarray, grid: Grid1D, path: pathlib.Path | str,
     fig = _heatmap(
         M_all.T,
         extent,
-        "Density evolution",
+        "Inventory positions throughout the trading session",
         x_label,
         y_label,
         cfg.cmap,
@@ -230,7 +230,7 @@ def plot_value_time(U_all: np.ndarray, grid: Grid1D, path: pathlib.Path | str, c
     fig = _heatmap(
         U_all.T,
         extent,
-        "Value function evolution",
+        "Future cost per position throughout the trading session",
         x_label,
         y_label,
         cfg.cmap,
@@ -264,12 +264,12 @@ def plot_alpha_cuts(
         ax.plot(
             scaled_x,
             alpha_all[idx],
-            label=f"t={scaled_t[idx]:.3f}{cfg.time_tick_suffix or ''}",
+            label=f"t={scaled_t[idx]:.0f}{cfg.time_tick_suffix or ''}",
         )
 
     ax.set_xlabel(x_label)
-    ax.set_ylabel("alpha")
-    ax.set_title("Control cuts")
+    ax.set_ylabel("trading speed (alpha)")
+    ax.set_title("Trading speed throughout the trading session")
     if times:
         ax.legend()
     fig.savefig(_prepare_path(path), dpi=150, bbox_inches="tight")
@@ -283,9 +283,9 @@ def plot_convergence(errors: Sequence[float], path: pathlib.Path | str, figsize:
 
     fig, ax = plt.subplots(figsize=figsize)
     ax.plot(range(len(errors)), errors, marker="o", linestyle="-")
-    ax.set_xlabel("iteration")
-    ax.set_ylabel("||delta M||_2")
-    ax.set_title("Picard convergence")
+    ax.set_xlabel("iterations")
+    ax.set_ylabel("error (norma)")
+    ax.set_title("Error across iterations (Picard convergence)")
     ax.set_yscale("log")
     fig.savefig(_prepare_path(path), dpi=150, bbox_inches="tight")
     plt.close(fig)
@@ -308,7 +308,7 @@ def plot_price(
     ax.plot(scaled_t, price, marker="o")
     ax.set_xlabel(x_label)
     _format_time_axis(ax, cfg)
-    ax.set_ylabel("price")
-    ax.set_title("Endogenous price")
+    ax.set_ylabel("price (BRL)")
+    ax.set_title("Simulated equilibrium price")
     fig.savefig(_prepare_path(path), dpi=150, bbox_inches="tight")
     plt.close(fig)
