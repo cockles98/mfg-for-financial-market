@@ -158,9 +158,9 @@ def plot_density(time: Iterable[float], grid: Iterable[float], density: np.ndarr
         extent=(min(grid), max(grid), min(time), max(time)),
         cmap=cfg.cmap,
     )
-    ax.set_xlabel("state")
-    ax.set_ylabel("time")
-    ax.set_title("Density")
+    ax.set_xlabel("invetário")
+    ax.set_ylabel("tempo")
+    ax.set_title("Densidade")
     fig.colorbar(im, ax=ax)
     return fig
 
@@ -207,7 +207,7 @@ def plot_density_time(M_all: np.ndarray, grid: Grid1D, path: pathlib.Path | str,
     fig = _heatmap(
         M_all.T,
         extent,
-        "Inventory positions throughout the trading session",
+        "Densidade das posições ao longo de um dia de pregão",
         x_label,
         y_label,
         cfg.cmap,
@@ -230,7 +230,7 @@ def plot_value_time(U_all: np.ndarray, grid: Grid1D, path: pathlib.Path | str, c
     fig = _heatmap(
         U_all.T,
         extent,
-        "Future cost per position throughout the trading session",
+        "Custo futuro por posição ao longo do pregão",
         x_label,
         y_label,
         cfg.cmap,
@@ -268,8 +268,8 @@ def plot_alpha_cuts(
         )
 
     ax.set_xlabel(x_label)
-    ax.set_ylabel("trading speed (alpha)")
-    ax.set_title("Trading speed throughout the trading session")
+    ax.set_ylabel("velocidade de negociação (alfa)")
+    ax.set_title("Velocidade de negociação ao longo do pregão")
     if times:
         ax.legend()
     fig.savefig(_prepare_path(path), dpi=150, bbox_inches="tight")
@@ -283,9 +283,9 @@ def plot_convergence(errors: Sequence[float], path: pathlib.Path | str, figsize:
 
     fig, ax = plt.subplots(figsize=figsize)
     ax.plot(range(len(errors)), errors, marker="o", linestyle="-")
-    ax.set_xlabel("iterations")
-    ax.set_ylabel("error (norm)")
-    ax.set_title("Error across iterations (Picard convergence)")
+    ax.set_xlabel("iterações")
+    ax.set_ylabel("erro (norma)")
+    ax.set_title("Erro ao longo das iterações (convergência de Picard)")
     ax.set_yscale("log")
     fig.savefig(_prepare_path(path), dpi=150, bbox_inches="tight")
     plt.close(fig)
@@ -308,7 +308,7 @@ def plot_price(
     ax.plot(scaled_t, price, marker="o")
     ax.set_xlabel(x_label)
     _format_time_axis(ax, cfg)
-    ax.set_ylabel("price (BRL)")
-    ax.set_title("Simulated equilibrium price")
+    ax.set_ylabel("preço (BRL)")
+    ax.set_title("Preço de equilíbrio simulado")
     fig.savefig(_prepare_path(path), dpi=150, bbox_inches="tight")
     plt.close(fig)

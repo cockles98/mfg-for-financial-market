@@ -17,8 +17,8 @@ params:
   m0_std: 1.0
 solver:
   max_iter: 800
-  tol: 1.0e-06
-  relative_tol: 0.0005
+  tol: 1.0e-07
+  relative_tol: 5.0e-06
   mix: 0.15
   mix_min: 1.0e-05
   mix_decay: 0.5
