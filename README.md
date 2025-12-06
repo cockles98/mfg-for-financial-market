@@ -76,7 +76,7 @@ Esta seção demonstra a estabilidade numérica do solver e a coerência finance
 </div>
 
 <div align="center">
-  <img src="reports/readme_images/value_surface.html" alt="Value Function 3D" width="700"/>
+  <img src="reports/readme_images/value_3d.png" alt="Value Function 3D" width="700"/>
 </div>
 
 *Mapa de calor do custo esperado. Note a "parede terminal" (faixa amarela brilhante à direita): ela representa o custo proibitivo de terminar o dia posicionado, forçando a estratégia de liquidação observada na evolução da densidade. OBS: invetário positivo significa compra, e negativo siginifica venda.*
@@ -171,6 +171,7 @@ python -m mfg_finance.cli run --config configs/baseline.yaml --endogenous-price
 -----
 
 **Disclaimer:** Este projeto é para fins acadêmicos e de pesquisa. Dados de mercado (COTAHIST) pertencem à B3.
+
 
 
 
