@@ -55,7 +55,7 @@ Esta seção demonstra a estabilidade numérica do solver e a coerência finance
   <img src="reports/readme_images/convergence.png" alt="Picard Convergence" width="700"/>
 </div>
 
-*A curva decrescente quase linear (em escala logarítmica) indica **convergência exponencial**. Isso prova a robustez do acoplamento entre as equações HJB e Fokker-Planck e a eficácia do método de ponto fixo com amortecimento adaptativo.*
+> *A curva decrescente quase linear (em escala logarítmica) indica **convergência exponencial**. Isso prova a robustez do acoplamento entre as equações HJB e Fokker-Planck e a eficácia do método de ponto fixo com amortecimento adaptativo.*
 
 ### 2. Comportamento da Multidão (Density Evolution)
 
@@ -171,6 +171,7 @@ python -m mfg_finance.cli run --config configs/baseline.yaml --endogenous-price
 -----
 
 **Disclaimer:** Este projeto é para fins acadêmicos e de pesquisa. Dados de mercado (COTAHIST) pertencem à B3.
+
 
 
 
