@@ -23,6 +23,7 @@ __all__ = [
     "plot_alpha_cuts",
     "plot_convergence",
     "plot_price",
+    "plot_speed_heatmap",
 ]
 
 
@@ -207,7 +208,7 @@ def plot_density_time(M_all: np.ndarray, grid: Grid1D, path: pathlib.Path | str,
     fig = _heatmap(
         M_all.T,
         extent,
-        "Densidade das posições ao longo de um dia de pregão",
+        "Densidade das posições ao longo do pregão",
         x_label,
         y_label,
         cfg.cmap,
@@ -272,6 +273,38 @@ def plot_alpha_cuts(
     ax.set_title("Velocidade de negociação ao longo do pregão")
     if times:
         ax.legend()
+    fig.savefig(_prepare_path(path), dpi=150, bbox_inches="tight")
+    plt.close(fig)
+
+
+def plot_speed_heatmap(alpha_all: np.ndarray, grid: Grid1D, path: pathlib.Path | str, cfg: PlotConfig | None = None) -> None:
+    """
+    Save a heatmap of the trading speed (control) over time and inventory.
+    """
+
+    cfg = cfg or PlotConfig(cmap="RdBu_r")
+    scaled_t, x_label = _scaled_time(grid.t, cfg)
+    scaled_x, y_label = _scaled_state(grid, cfg)
+    extent = (scaled_t[0], scaled_t[-1], scaled_x[0], scaled_x[-1])
+    vmax = float(np.max(np.abs(alpha_all))) if alpha_all.size else 1.0
+    if vmax <= 0.0:
+        vmax = 1.0
+    fig, ax = plt.subplots(figsize=cfg.figsize)
+    im = ax.imshow(
+        alpha_all.T,
+        aspect="auto",
+        origin="lower",
+        extent=extent,
+        cmap=cfg.cmap,
+        vmin=-vmax,
+        vmax=vmax,
+    )
+    ax.set_title("Mapa de calor da velocidade de negociação")
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
+    _format_time_axis(ax, cfg)
+    cbar = fig.colorbar(im, ax=ax)
+    cbar.set_label("velocidade (alfa)")
     fig.savefig(_prepare_path(path), dpi=150, bbox_inches="tight")
     plt.close(fig)
 
