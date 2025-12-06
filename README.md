@@ -67,8 +67,8 @@ Esta seção demonstra a estabilidade numérica do solver e a coerência finance
   <img src="reports/readme_images/density.png" alt="Density Evolution Gif" width="700"/>
 </div>
 
-> *Visualização da aversão ao risco de overnight. Em $`t = 10h`$, as posições estão dispersas (roxo difuso). Conforme $`t \to 18h`$ (final do pregão), a massa converge agressivamente para o centro (linha amarela), indicando que os agentes estão liquidando suas posições para evitar penalidades terminais.
-> OBS: invetário positivo significa compra, e negativo siginifica venda.*
+> *Visualização da aversão ao risco de overnight. Em $`t = 10h`$, as posições estão dispersas (roxo difuso). Conforme $`t \to 18h`$ (final do pregão), a massa converge agressivamente para o centro (linha amarela), indicando que os agentes estão liquidando suas posições para evitar penalidades terminais.*
+> > *OBS: invetário positivo significa compra, e negativo siginifica venda.*
 
 ### 3. Incentivos de Custo (Value Function)
 
@@ -80,8 +80,8 @@ Esta seção demonstra a estabilidade numérica do solver e a coerência finance
   <img src="reports/readme_images/value_3d.png" alt="Value Function 3D" width="700"/>
 </div>
 
-> *Mapa de calor do custo esperado. Note a "parede terminal" (faixa amarela brilhante à direita): ela representa o custo proibitivo de terminar o dia posicionado, forçando a estratégia de liquidação observada na evolução da densidade.
-> OBS: invetário positivo significa compra, e negativo siginifica venda.*
+> *Mapa de calor do custo esperado. Note a "parede terminal" (faixa amarela brilhante à direita): ela representa o custo proibitivo de terminar o dia posicionado, forçando a estratégia de liquidação observada na evolução da densidade.*
+> > *OBS: invetário positivo significa compra, e negativo siginifica venda.*
 
 ### 4. Agressividade da Estratégia (Control Cuts)
 
@@ -94,7 +94,7 @@ Esta seção demonstra a estabilidade numérica do solver e a coerência finance
 </div>
 
 > *Cortes transversais da velocidade de trading. O pico verde ($`t = 14h`$) é significativamente maior que o azul ($`t = 10h`$), demonstrando que a urgência (agressividade) do agente aumenta exponencialmente conforme o fim do pregão se aproxima.*
-> > OBS: invetário positivo significa compra, e negativo siginifica venda.*
+> > *OBS: invetário positivo significa compra, e negativo siginifica venda.*
 
 ### 5. Preço de Clearing (Endogenous Price)
 
@@ -174,6 +174,7 @@ python -m mfg_finance.cli run --config configs/baseline.yaml --endogenous-price
 -----
 
 **Disclaimer:** Este projeto é para fins acadêmicos e de pesquisa. Dados de mercado (COTAHIST) pertencem à B3.
+
 
 
 
