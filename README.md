@@ -50,23 +50,55 @@ O modelo foi calibrado utilizando dados históricos do **COTAHIST (B3)**, revela
 Esta seção demonstra a estabilidade numérica do solver e a coerência financeira dos resultados.
 
 ### 1. Estabilidade Numérica (Picard Convergence)
-![Picard convergence](reports/readme_images/convergence.png)
+
+<div align="center">
+  <img src="reports/readme_images/convergence.png" alt="Picard Convergence" width="700"/>
+</div>
+
 *A curva decrescente quase linear (em escala logarítmica) indica **convergência exponencial**. Isso prova a robustez do acoplamento entre as equações HJB e Fokker-Planck e a eficácia do método de ponto fixo com amortecimento adaptativo.*
 
 ### 2. Comportamento da Multidão (Density Evolution)
-![Density evolution](reports/readme_images/density.png)
+
+<div align="center">
+  <img src="reports/readme_images/density_animation.gif" alt="Density Evolution" width="700"/>
+</div>
+
+<div align="center">
+  <img src="reports/readme_images/density.png" alt="Density Evolution Gif" width="700"/>
+</div>
+
 *Visualização da aversão ao risco de overnight. Em $`t = 10h`$, as posições estão dispersas (roxo difuso). Conforme $`t \to 18h`$ (final do pregão), a massa converge agressivamente para o centro (linha amarela), indicando que os agentes estão liquidando suas posições para evitar penalidades terminais. OBS: invetário positivo significa compra, e negativo siginifica venda.*
 
 ### 3. Incentivos de Custo (Value Function)
-![Value function evolution](reports/readme_images/value.png)
+
+<div align="center">
+  <img src="reports/readme_images/value.png" alt="Value Function" width="700"/>
+</div>
+
+<div align="center">
+  <img src="reports/readme_images/value_surface.html" alt="Value Function 3D" width="700"/>
+</div>
+
 *Mapa de calor do custo esperado. Note a "parede terminal" (faixa amarela brilhante à direita): ela representa o custo proibitivo de terminar o dia posicionado, forçando a estratégia de liquidação observada na evolução da densidade. OBS: invetário positivo significa compra, e negativo siginifica venda.*
 
 ### 4. Agressividade da Estratégia (Control Cuts)
-![Control cuts](reports/readme_images/alpha_cuts.png)
+
+<div align="center">
+  <img src="reports/readme_images/alpha_cuts.png" alt="Control Cuts" width="700"/>
+</div>
+
+<div align="center">
+  <img src="reports/readme_images/speed_heatmap.png" alt="Control Cuts Hitmap" width="700"/>
+</div>
+
 *Cortes transversais da velocidade de trading. O pico verde ($`t = 14h`$) é significativamente maior que o azul ($`t = 10h`$), demonstrando que a urgência (agressividade) do agente aumenta exponencialmente conforme o fim do pregão se aproxima.*
 
 ### 5. Preço de Clearing (Endogenous Price)
-![Endogenous price](reports/readme_images/price.png)
+
+<div align="center">
+  <img src="reports/readme_images/price.png" alt="Endogenous Price" width="700"/>
+</div>
+
 *O preço resultante da interação de todos os agentes. A estabilidade inicial indica absorção de liquidez, enquanto a oscilação violenta no final ilustra um **Liquidity Crunch**: o desequilíbrio momentâneo causado pela corrida simultânea de todos os agentes para zerar posições.*
 
 ---
@@ -139,6 +171,10 @@ python -m mfg_finance.cli run --config configs/baseline.yaml --endogenous-price
 -----
 
 **Disclaimer:** Este projeto é para fins acadêmicos e de pesquisa. Dados de mercado (COTAHIST) pertencem à B3.
+
+
+
+
 
 
 
