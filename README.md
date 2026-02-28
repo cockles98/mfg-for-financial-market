@@ -1,4 +1,4 @@
-# Market Microstructure Simulator: Mean Field Games na B3
+# Market Microstructure Simulator: Mean Field Games on the B3
 
 <div align="center">
 
@@ -9,68 +9,75 @@
 
 </div>
 
-> **Simulação de Liquidez, Formação de Preços e High Frequency Trading (HFT)**
+> **Simulating Liquidity, Price Formation, and High-Frequency Trading (HFT)**
 
-Este projeto é um laboratório computacional que simula a interação de milhares de agentes de mercado (robôs de alta frequência e market makers) para entender a dinâmica de liquidez na bolsa brasileira (B3). Utilizando a teoria de **Mean Field Games (MFG)**, modelamos como decisões individuais de execução impactam o macro-ambiente de preços.
+This project is a computational laboratory that simulates the interaction of thousands of market agents (high-frequency algorithms and market makers) to understand liquidity dynamics on the Brazilian stock exchange (B3). Using **Mean Field Game (MFG)** theory, we model how individual execution decisions aggregate into macro-level price dynamics — where price and liquidity are not assumed, but *emerge* from agent behavior.
 
 ---
 
-## 🎯 O Problema de Negócio: Por que isso importa?
-No mercado financeiro moderno, a liquidez não é estática. Grandes ordens sofrem **impacto de mercado** (slippage) e enfrentam o risco de seleção adversa. Este projeto responde a perguntas cruciais para mesas de execução e trading algorítmico:
+## 🎯 The Business Problem: Why Does This Matter?
 
-1.  **Formação de Preço:** Como o preço de um ativo emerge da interação de milhares de ordens de compra e venda?
-2.  **Gestão de Inventário:** Qual a penalidade ótima para carregar posição (*overnight* ou intraday)?
-3.  **Execução Ótima:** Como "fatiar" uma ordem grande para minimizar o impacto no mercado?
+In modern financial markets, liquidity is not static. Large orders suffer **market impact** (slippage) and face adverse selection risk. This project addresses questions that are critical for execution desks and algorithmic trading:
 
-Ao contrário de modelos simples que assumem preços exógenos (como Black-Scholes), aqui o **preço e a liquidez são endógenos**: eles nascem do comportamento agregado dos agentes.
+1. **Price Formation:** How does an asset's price emerge from the interaction of thousands of buy and sell orders?
+2. **Inventory Management:** What is the optimal penalty for carrying a position overnight or intraday?
+3. **Optimal Execution:** How should a large order be sliced to minimize market impact?
 
-## 📚 Tradutor: Matemática $\leftrightarrow$ Mercado
-Para facilitar o entendimento da modelagem para profissionais de mercado:
+Unlike simple models that assume exogenous prices (such as Black-Scholes), here **price and liquidity are endogenous** — they arise from the aggregate behavior of agents.
 
-| Conceito no Modelo (Math) | Tradução para o Mercado (Finance) |
+---
+
+## 📚 Translator: Math ↔ Market
+
+To bridge the gap between the mathematical model and practical market intuition:
+
+| Model Concept (Math) | Market Translation (Finance) |
 | :--- | :--- |
-| **Agente Representativo** | Um algoritmo de HFT ou *Market Maker* típico operando na B3. |
-| **Estado ($`x`$)** | **Inventário (Position):** Quantos contratos o robô está comprado ou vendido. |
-| **Controle ($`\alpha`$)** | **Velocidade de Trading:** A agressividade para limpar o inventário (market orders vs limit orders). |
-| **Termo de Campo Médio ($`m`$)** | **Liquidez Agregada:** A distribuição de posicionamento de todos os participantes do mercado. |
-| **Função Valor ($`U`$)** | **Custo de Execução:** A expectativa de perda financeira (custo + risco) até zerar a posição. |
-| **Equilíbrio de Nash** | **Mercado Eficiente:** Ponto onde o fluxo de ordens se estabiliza dado o preço atual. |
+| **Representative Agent** | A typical HFT algorithm or Market Maker operating on the B3. |
+| **State ($`x`$)** | **Inventory (Position):** How many contracts the algorithm is long or short. |
+| **Control ($`\alpha`$)** | **Trading Speed:** Aggressiveness in clearing inventory (market orders vs. limit orders). |
+| **Mean Field Term ($`m`$)** | **Aggregate Liquidity:** The positioning distribution of all market participants. |
+| **Value Function ($`U`$)** | **Execution Cost:** Expected financial loss (cost + risk) until the position is fully unwound. |
+| **Nash Equilibrium** | **Efficient Market:** The point where order flow stabilizes given the current price. |
 
 ---
 
-## 💡 Insights de Microestrutura (Baseado em dados da B3 1986-2025)
-O modelo foi calibrado utilizando dados históricos do **COTAHIST (B3)**, revelando comportamentos típicos de *market making*:
+## 💡 Microstructure Insights (Calibrated on B3 Data, 1986–2025)
 
-* **Suavização de Fluxo (Smoothing):** A política ótima encontrada sugere que a melhor estratégia não é zerar a posição imediatamente, mas sim diluir as ordens ao longo do tempo (similar a algoritmos **TWAP/VWAP**), reduzindo o impacto no preço.
-* **Aversão à Posição:** A densidade de probabilidade se concentra em zero ao final do pregão. Isso reflete a realidade de HFTs que evitam carregar risco *overnight*, retornando a posições neutras rapidamente.
-* **Liquidez Resiliente:** Em condições normais, o *clearing* de mercado absorve choques de oferta/demanda, mantendo o preço médio estável (oscilações próximas de zero no referencial do modelo).
+The model was calibrated using historical **COTAHIST (B3)** data, revealing behavior consistent with real market making dynamics:
 
-## 📊 Pipeline Visual e Resultados
+- **Order Flow Smoothing:** The optimal policy suggests that the best strategy is not to unwind immediately, but to dilute orders over time — similar to **TWAP/VWAP** algorithms — reducing price impact.
+- **Overnight Risk Aversion:** Probability density concentrates around zero inventory by end of session, reflecting the well-known HFT behavior of avoiding overnight risk and returning to neutral positions quickly.
+- **Resilient Liquidity:** Under normal conditions, market clearing absorbs supply/demand shocks, keeping the average price stable. Under stress, the model reproduces a **Liquidity Crunch** — a phenomenon that emerges purely from agent interaction.
 
-Esta seção demonstra a estabilidade numérica do solver e a coerência financeira dos resultados.
+---
 
-### 1. Estabilidade Numérica (Picard Convergence)
+## 📊 Visual Pipeline & Results
+
+This section demonstrates the numerical stability of the solver and the financial coherence of the results.
+
+### 1. Numerical Stability (Picard Convergence)
 
 <div align="center">
   <img src="reports/readme_images/convergence.png" alt="Picard Convergence" width="700"/>
 </div>
 
-> *A curva decrescente quase linear (em escala logarítmica) indica **convergência exponencial**. Isso prova a robustez do acoplamento entre as equações HJB e Fokker-Planck e a eficácia do método de ponto fixo com amortecimento adaptativo.*
+> *The near-linear decreasing curve (in log scale) indicates **exponential convergence** — proving the robustness of the HJB–Fokker-Planck coupling and the effectiveness of the fixed-point iteration with adaptive damping.*
 
-### 2. Comportamento da Multidão (Density Evolution)
+### 2. Crowd Behavior (Density Evolution)
 
 <div align="center">
   <img src="reports/readme_images/density_animation.gif" alt="Density Evolution" width="700"/>
 </div>
 
 <div align="center">
-  <img src="reports/readme_images/density.png" alt="Density Evolution Gif" width="700"/>
+  <img src="reports/readme_images/density.png" alt="Density Evolution Static" width="700"/>
 </div>
 
-> *Visualização da aversão ao risco de overnight. Em $`t = 10h`$, as posições estão dispersas (roxo difuso). Conforme $`t \to 18h`$ (final do pregão), a massa converge agressivamente para o centro (linha amarela), indicando que os agentes estão liquidando suas posições para evitar penalidades terminais.*
-> > *OBS: invetário positivo significa estar comprado, e negativo siginifica estar vendido.*
+> *Visualization of overnight risk aversion. At $`t = 10h`$, positions are dispersed (diffuse purple). As $`t \to 18h`$ (end of session), mass converges aggressively toward zero (yellow line), indicating agents liquidating positions to avoid terminal penalties.*
+> > *Note: positive inventory = long position; negative inventory = short position.*
 
-### 3. Incentivos de Custo (Value Function)
+### 3. Cost Incentives (Value Function)
 
 <div align="center">
   <img src="reports/readme_images/value.png" alt="Value Function" width="700"/>
@@ -80,37 +87,38 @@ Esta seção demonstra a estabilidade numérica do solver e a coerência finance
   <img src="reports/readme_images/value_3d.png" alt="Value Function 3D" width="700"/>
 </div>
 
-> *Mapa de calor do custo esperado. Note a "parede terminal" (faixa amarela brilhante nas extremidades): ela representa o custo proibitivo de terminar o dia posicionado, forçando a estratégia de liquidação observada na evolução da densidade.*
-> > *OBS: invetário positivo significa estar comprado, e negativo siginifica estar vendido.*
+> *Heatmap of expected execution cost. Note the "terminal wall" (bright yellow band at the edges): it represents the prohibitive cost of ending the day with open positions, forcing the liquidation behavior observed in the density evolution.*
+> > *Note: positive inventory = long position; negative inventory = short position.*
 
-### 4. Agressividade da Estratégia (Control Cuts)
+### 4. Strategy Aggressiveness (Control Cuts)
 
 <div align="center">
   <img src="reports/readme_images/alpha_cuts.png" alt="Control Cuts" width="700"/>
 </div>
 
 <div align="center">
-  <img src="reports/readme_images/speed_heatmap.png" alt="Control Cuts Hitmap" width="700"/>
+  <img src="reports/readme_images/speed_heatmap.png" alt="Control Heatmap" width="700"/>
 </div>
 
-> *Cortes transversais da velocidade de trading. O pico verde ($`t = 14h`$) é significativamente maior que o azul ($`t = 10h`$), demonstrando que a urgência (agressividade) do agente aumenta exponencialmente conforme o fim do pregão se aproxima.*
+> *Cross-sectional cuts of trading speed. The green peak ($`t = 14h`$) is significantly larger than the blue ($`t = 10h`$), demonstrating that agent urgency increases exponentially as the session close approaches.*
 
-### 5. Preço de Clearing (Endogenous Price)
+### 5. Endogenous Clearing Price
 
 <div align="center">
   <img src="reports/readme_images/price.png" alt="Endogenous Price" width="700"/>
 </div>
 
-> *O preço resultante da interação de todos os agentes. A estabilidade inicial indica absorção de liquidez, enquanto a oscilação violenta no final ilustra um **Liquidity Crunch**: o desequilíbrio momentâneo causado pela corrida simultânea de todos os agentes para zerar posições.*
+> *The price that emerges from the interaction of all agents. Initial stability reflects liquidity absorption, while the sharp oscillation at the end illustrates a **Liquidity Crunch**: the momentary imbalance caused by all agents simultaneously rushing to unwind positions.*
 
 ---
 
-## ⚙️ Deep Dive Técnico (Para Quants e Devs)
+## ⚙️ Technical Deep Dive (For Quants & Developers)
 
-Abaixo do capô, este projeto é um *solver* numérico de Alta Performance em Python.
+Under the hood, this project is a high-performance numerical PDE solver in Python.
 
-### O Modelo Matemático
-O sistema resolve um par de equações diferenciais parciais (EDPs) acopladas:
+### The Mathematical Model
+
+The system solves a coupled pair of partial differential equations (PDEs):
 
 **HJB (backward)**
 
@@ -130,7 +138,7 @@ $$
 \end{cases}
 $$
 
-**Controle ótimo LQ**
+**Optimal LQ Control**
 
 $$
 \begin{cases}
@@ -139,22 +147,23 @@ $$
 \end{cases}
 $$
 
-> **1D:** $\nabla U \equiv \partial_x U$ e $\nabla\cdot(mv)\equiv \partial_x(mv)$.
+> **1D:** $\nabla U \equiv \partial_x U$ and $\nabla\cdot(mv)\equiv \partial_x(mv)$.
 
-### Arquitetura e Implementação
-* **Método Numérico:** Iteração de **Picard** com amortecimento adaptativo para encontrar o Ponto Fixo (Equilíbrio).
-* **Discretização:** Diferenças Finitas com esquemas conservativos (**Lax-Friedrichs + Upwind**) para garantir estabilidade numérica.
-* **Pipeline de Dados:** Scripts ETL robustos para processar gigabytes de dados brutos da B3 (COTAHIST).
-* **Engenharia:**
-    * Testes automatizados (`pytest`) cobrindo conservação de massa e convergência.
-    * Configuração via YAML e CLI para reprodutibilidade total.
-    * Typing rigoroso e modularização.
+### Architecture & Implementation
+
+- **Numerical Method:** **Picard iteration** with adaptive damping to find the fixed point (equilibrium).
+- **Discretization:** Finite difference schemes with conservative methods (**Lax-Friedrichs + Upwind**) for numerical stability.
+- **Data Pipeline:** Robust ETL scripts to process gigabytes of raw B3 data (COTAHIST).
+- **Engineering:**
+  - Automated tests (`pytest`) covering mass conservation and convergence guarantees
+  - YAML configuration and CLI for full reproducibility
+  - Strict typing and modular structure
 
 ---
 
-## 🚀 Como Rodar
+## 🚀 Getting Started
 
-### Instalação
+### Installation
 ```bash
 git clone https://github.com/cockles98/mfg-for-financial-market.git
 cd mfg-for-financial-market
@@ -162,37 +171,14 @@ python -m venv .venv && . .venv/Scripts/activate
 pip install -e .[dev]
 ```
 
-### Executando uma Simulação
+### Running a Simulation
 ```bash
-# Rodar baseline com clearing endogeno
+# Run baseline with endogenous clearing price
 python -m mfg_finance.cli run --config configs/baseline.yaml --endogenous-price
 ```
 
-> **O pipeline completo também está presente em `notebooks/mfg_pipeline.ipynb`, basta rodar as células em sequência para visualizar todos os resultados.**
+> **The full pipeline is also available in `notebooks/mfg_pipeline.ipynb` — just run the cells in sequence to reproduce all results.**
 
------
+---
 
-**Disclaimer:** Este projeto é para fins acadêmicos e de pesquisa. Dados de mercado (COTAHIST) pertencem à B3.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+*Interested in similar work — quantitative modeling, market microstructure, or numerical methods for finance? Feel free to reach out via [LinkedIn](https://www.linkedin.com/in/felipe-cockles) or [email](mailto:felipe.cockles@hotmail.com).*
