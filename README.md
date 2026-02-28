@@ -182,3 +182,4 @@ python -m mfg_finance.cli run --config configs/baseline.yaml --endogenous-price
 ---
 
 *Interested in similar work — quantitative modeling, market microstructure, or numerical methods for finance? Feel free to reach out via [LinkedIn](https://www.linkedin.com/in/felipe-cockles) or [email](mailto:felipe.cockles@hotmail.com).*
+
